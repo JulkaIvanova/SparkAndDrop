@@ -1,7 +1,7 @@
 import pygame
 import os
 import sys
-
+import math
 
 
 
@@ -127,28 +127,42 @@ class Mag(pygame.sprite.Sprite):
         self.xpos = x
         self.ypos = y
         self.clock = clock
-    def update(self, *args):
+    def update(self, *args, levelMap):
         #if args and (args[0].type == pygame.KEYDOWN):
         #    print(args[0].key, pygame.K_d)
         #if args and (args[0].type == pygame.KEYDOWN) and (args[0].key == pygame.K_d):
-        self.v = 240
+        self.v = 100
         self.fps = 60
+        if levelMap[int(self.ypos//40)+1][int(self.xpos//40)] in [".", "$", "@", "X", "7"]:
+            self.ypos += 400/self.fps
+            self.clock.tick(self.fps)
+            self.rect.top = self.ypos
         if args and pygame.key.get_pressed()[pygame.K_d]:
-            self.xpos += self.v/self.fps
-            self.clock.tick(self.fps)
-            self.rect.left = self.xpos
+            if levelMap[int(self.ypos//40)][int(self.xpos//40)+1] in [".", "$", "@", "X", "7"]: 
+                self.xpos += self.v/self.fps
+                self.clock.tick(self.fps)
+                # if self.xpos % 40 != 0:
+                #     self.xpos = self.xpos + self.xpos%40
+                self.rect.left = self.xpos
         if args and pygame.key.get_pressed()[pygame.K_a]:
-            self.xpos -= self.v/self.fps
-            self.clock.tick(self.fps)
-            self.rect.left = self.xpos
+            if levelMap[int(self.ypos//40)][math.ceil(self.xpos//40)] in [".", "$", "@", "X", "7"]: 
+                self.xpos -= self.v/self.fps
+                self.clock.tick(self.fps)
+                # if self.xpos % 40 != 0:
+                #     self.xpos = self.xpos - self.xpos%40
+                self.rect.left = self.xpos
         if args and pygame.key.get_pressed()[pygame.K_w]:
             self.ypos += 100/self.fps
             self.clock.tick(self.fps)
-            self.rect.left = self.ypos
+            self.rect.top = self.ypos
             self.ypos -= 100/self.fps
             self.clock.tick(self.fps)
-            self.rect.left = self.ypos
-    
+            self.rect.top = self.ypos
+    # def falling(self, levelMap):
+    #     if levelMap[int(self.ypos//40)+1][int(self.xpos//40)] == ".":
+    #         self.ypos += 400/self.fps
+    #         self.clock.tick(self.fps)
+    #         self.rect.top = self.ypos
 
 class Robber(pygame.sprite.Sprite):
     def __init__(self, *group, x, y):

@@ -99,7 +99,7 @@ for i in range(len(level)):
         elif level[i][j] == "@":
             ClassSprites.Robber(all_sprites_robber, x = j*40, y = i*40)
         elif level[i][j] == "$":
-            ClassSprites.Mag(all_sprites_mag, x = j*40, y = i*40, clock=clock)    
+            mag = ClassSprites.Mag(all_sprites_mag, x = j*40, y = i*40, clock=clock)    
 
 if __name__ == "__main__":
     running = True
@@ -109,7 +109,7 @@ if __name__ == "__main__":
     pygame.display.set_caption("Свой курсор мыши")
     image = load_image("background_lvl_1.jpg")
     image = pygame.transform.scale(image, (1200, 800))
-    #cnt = 0
+    eventt = None
     while running:
         # cnt+=1
         # if cnt>3:
@@ -118,23 +118,29 @@ if __name__ == "__main__":
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
+            if event.type == pygame.MOUSEBUTTONDOWN or event.type == pygame.KEYDOWN:
+                eventt = event
 
 
         
-            screen.blit(image, pos)
-            all_sprites_bloks.draw(screen)
-            all_sprites_coins.draw(screen)
-            all_sprites_door.draw(screen)
-            all_sprites_magicdoor.draw(screen)
-            all_sprites_button.draw(screen)
-            all_sprites_lever.draw(screen)
-            all_sprites_gorizontaledoors.draw(screen)
-            all_sprites_mag.draw(screen)
-            all_sprites_robber.draw(screen)
-            # board.render(screen)
-            #if cnt==0:
-            all_sprites_mag.update(event)
+        screen.blit(image, pos)
+        all_sprites_bloks.draw(screen)
+        all_sprites_coins.draw(screen)
+        all_sprites_door.draw(screen)
+        all_sprites_magicdoor.draw(screen)
+        all_sprites_button.draw(screen)
+        all_sprites_lever.draw(screen)
+        all_sprites_gorizontaledoors.draw(screen)
+        all_sprites_mag.draw(screen)
+        all_sprites_robber.draw(screen)
+        # board.render(screen)
+        #if cnt==0:
+        all_sprites_mag.update(eventt, levelMap=level)
+        #mag.draw(screen)
+        # screen.blit(mag.image, (mag.xpos, mag.ypos))
+        # mag.falling(level)
+        # all_sprites_mag[0].falling(level)
 
-            pygame.display.flip()
+        pygame.display.flip()
 
     pygame.quit()
