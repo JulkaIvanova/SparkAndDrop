@@ -17,6 +17,38 @@ def load_image(name, colorkey=None):
     image = pygame.image.load(fullname)
     return image
 
+def checkList(list):
+    
+    for i in list:
+        if i.activate:
+            return True
+    return False
+
+class GameSprite(pygame.sprite.Sprite):
+    def __init__(self, *group, image, x, y, width=0, height=0):
+        super.__init__(*group)
+        self.image = image
+        if (width>0) or (height>0):
+            if width==0:
+                width=height
+            if height==0:
+                height=width
+            self.image = pygame.transform.scale(self.image, (width, height))
+        self.rect = self.image.get_rect()
+        self.rect.x = x
+        self.rect.y = y
+    
+    def get_left_cell_x(self):
+        pass
+
+    def get_right_cell_x(self):
+        pass
+
+    def get_top_cell_y(self):
+        pass
+
+    def get_bottom_cell_y(self):
+        pass
 
 class Block(pygame.sprite.Sprite):
     image = load_image("blok.jpg")
@@ -62,6 +94,7 @@ class Door(pygame.sprite.Sprite):
         self.rect = self.image.get_rect()
         self.rect.x = x
         self.rect.y = y
+        self.win = False
 
 
 class MagicDoor(pygame.sprite.Sprite):
@@ -87,7 +120,6 @@ class MagicDoor(pygame.sprite.Sprite):
                 #print(8)
                 levelMap[int(self.rect.y//40)] = levelMap[int(self.rect.y//40)][:int(self.rect.x//40)]+"."+levelMap[int(self.rect.y//40)][int(self.rect.x//40)+1:]
                 levelMap[int(self.rect.y//40)+1] = levelMap[int(self.rect.y//40)+1][:int(self.rect.x//40)]+"."+levelMap[int(self.rect.y//40)+1][int(self.rect.x//40)+1:]
-                print("\n".join(levelMap))
                 self.kill()
 
 class Button(pygame.sprite.Sprite):
@@ -102,7 +134,17 @@ class Button(pygame.sprite.Sprite):
         self.rect = self.image.get_rect()
         self.rect.x = x
         self.rect.y = y
-
+        self.activate = False
+    
+    def update(self, *args, mag, robber):
+        if args and ((pygame.sprite.collide_mask(self, mag) and pygame.key.get_pressed()[pygame.K_q]) or (pygame.sprite.collide_mask(self, robber) and pygame.key.get_pressed()[pygame.K_u])):
+            if not self.activate:
+                print(2)
+            self.activate = True
+        else:
+            if self.activate:
+                print(1)
+            self.activate = False
 
 class Lever(pygame.sprite.Sprite):
     image = load_image("lever.png")
@@ -116,7 +158,16 @@ class Lever(pygame.sprite.Sprite):
         self.rect = self.image.get_rect()
         self.rect.x = x
         self.rect.y = y
+        self.activate = False
 
+    def update(self, *args, mag, robber):
+        if not(args[0] is None):
+            if ((pygame.sprite.collide_mask(self, mag) and pygame.KEYDOWN and args[0].key == pygame.K_q) or (pygame.sprite.collide_mask(self, robber) and pygame.KEYDOWN and args[0].key == pygame.K_u)):
+                print(1)
+                if self.activate:
+                    self.activate = False
+                else:
+                    self.activate = True
 
 class GorizontalDoor(pygame.sprite.Sprite):
     image = load_image("gorizontaldoor.png")
@@ -130,6 +181,37 @@ class GorizontalDoor(pygame.sprite.Sprite):
         self.rect = self.image.get_rect()
         self.rect.x = x
         self.rect.y = y
+        self.button = []
+        self.y = int(self.rect.y//40)
+        self.x = int(self.rect.x//40)
+        self.imghide = load_image(f"hide.png")
+    
+    def connect(self, cnt, objectt, typetext, cntbuttons=None):
+        self.image = load_image(f"gorizontaldoor{cnt}.png")
+        self.image = pygame.transform.scale(self.image, (80, 40))
+        self.image_original = self.image
+        if cntbuttons is None:
+            self.button.append(objectt)
+            self.button[0].image = load_image(f"{typetext}{cnt}.png")
+            self.button[0].image = pygame.transform.scale(self.button[0].image, (40, 40))
+        else:
+            for i in range(cntbuttons):
+                self.button.append(objectt[i])
+                self.button[i].image = load_image(f"{typetext}{cnt}.png")
+                self.button[i].image = pygame.transform.scale(self.button[i].image, (40, 40))
+            
+    def check(self, levelMap):
+        if checkList(self.button):
+            # levelMap[int(y//40)] = levelMap[int(y//40)][:int(x//40)]+"."+levelMap[int(y//40)][int(x//40)+1:]
+            # levelMap[int(y//40)+1] = levelMap[int(y//40)+1][:int(x//40)]+"."+levelMap[int(y//40)+1][int(x//40)+1:]
+            levelMap[self.y] = levelMap[self.y][:self.x]+".."+levelMap[self.y][self.x+2:]
+            self.image = self.imghide
+            #print("\n".join(levelMap))
+        else:
+            levelMap[self.y] = levelMap[self.y][:self.x]+"--"+levelMap[self.y][self.x+2:]
+            self.image = self.image_original
+            # for i in self.button:
+            #     print(i.activate)
 
 class VerticalDoor(pygame.sprite.Sprite):
     image = load_image("verticaldoor.png")
@@ -143,6 +225,38 @@ class VerticalDoor(pygame.sprite.Sprite):
         self.rect = self.image.get_rect()
         self.rect.x = x
         self.rect.y = y
+        self.button = []
+        self.y = int(self.rect.y//40)
+        self.x = int(self.rect.x//40)
+        self.imghide = load_image(f"hide.png")
+    
+    def connect(self, cnt, objectt, typetext, cntbuttons=None):
+        self.image = load_image(f"verticaldoor{cnt}.png")
+        self.image = pygame.transform.scale(self.image, (40, 80))
+        self.image_original = self.image
+        if cntbuttons is None:
+            self.button.append(objectt)
+            self.button[0].image = load_image(f"{typetext}{cnt}.png")
+            self.button[0].image = pygame.transform.scale(self.button[0].image, (40, 40))
+        else:
+            for i in range(cntbuttons):
+                print("qwe")
+                self.button.append(objectt[i])
+                self.button[i].image = load_image(f"{typetext}{cnt}.png")
+                self.button[i].image = pygame.transform.scale(self.button[i].image, (40, 40))
+            
+    def check(self, levelMap):
+        if checkList(self.button):
+            levelMap[self.y] = levelMap[self.y][:self.x]+"."+levelMap[self.y][self.x+1:]
+            levelMap[self.y+1] = levelMap[self.y+1][:self.x]+"."+levelMap[self.y+1][self.x+1:]
+            self.image = self.imghide
+            #print("\n".join(levelMap))
+        else:
+            levelMap[self.y] = levelMap[self.y][:self.x]+"|"+levelMap[self.y][self.x+1:]
+            levelMap[self.y+1] = levelMap[self.y+1][:self.x]+"|"+levelMap[self.y+1][self.x+1:]
+            self.image = self.image_original
+            # for i in self.button:
+            #     print(i.activate)
 
 class Monsters(pygame.sprite.Sprite):
     image = load_image("monster.png")
@@ -300,7 +414,7 @@ class Mag(pygame.sprite.Sprite):
             # Continue upward movement if within jump height limit
             if self.current_jump_height < self.jump_height:
                 self.vertical_velocity = self.jump_speed
-                self.current_jump_height += abs(self.vertical_velocity)
+                self.current_jump_height += abs(self.vertical_velocity)/self.fps
             else:
                 # Start descending after reaching max height
                 self.vertical_velocity = 1200 / self.fps  # Simulate falling

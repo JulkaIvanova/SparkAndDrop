@@ -30,9 +30,9 @@ class mutableInt:
     def __init__(self):
         self.cnt = 0
 
-class mutableLevelMap:
-    def __init__(self, level):
-        self.level = level
+# class mutableLevelMap:
+#     def __init__(self, level):
+#         self.level = level
 
 class Board:
     # создание поля
@@ -76,6 +76,10 @@ class Board:
 clock = pygame.time.Clock()  
 board = Board(600, 600)
 board.set_view(0, 0, 40)
+gorizontaldoors = []
+levers = []
+buttons = []
+verticaldoors = []
 with open("data\level_1.txt") as f:
     level = f.read()
 # cnt = 0
@@ -144,17 +148,17 @@ for i in range(len(level)):
         elif level[i][j] == "T":
             ClassSprites.Door(all_sprites_door, x = j*40, y = i*40)
         elif level[i][j] == "0":
-            ClassSprites.Button(all_sprites_button, x = j*40, y = i*40)
+            buttons.append(ClassSprites.Button(all_sprites_button, x = j*40, y = i*40))
         elif level[i][j] == "*":
-            ClassSprites.Lever(all_sprites_lever, x = j*40, y = i*40)
+            levers.append(ClassSprites.Lever(all_sprites_lever, x = j*40, y = i*40))
         elif level[i][j] == "-":
-            ClassSprites.GorizontalDoor(all_sprites_gorizontaledoors, x = j*40, y = i*40)
+            gorizontaldoors.append(ClassSprites.GorizontalDoor(all_sprites_gorizontaledoors, x = j*40, y = i*40))
         elif level[i][j] == "@":
             robber = ClassSprites.Robber(all_sprites_robber, x = j*40, y = i*40)
         elif level[i][j] == "$":
             mag = ClassSprites.Mag(all_sprites_mag, x = j*40, y = i*40, clock=clock)
         elif level[i][j] == "|":
-            ClassSprites.VerticalDoor(all_sprites_verticaldoors, x = j*40, y = i*40)
+            verticaldoors.append(ClassSprites.VerticalDoor(all_sprites_verticaldoors, x = j*40, y = i*40))
         elif level[i][j] == "X":
             ClassSprites.Monsters(all_monsterss, x = j*40, y = i*40, clock=clock)
             
@@ -192,8 +196,16 @@ for i in range(len(level)):
             # level[i] = level[i].split()
             level[i] = level[i][:j+1]+"-"+level[i][j+2:]
             k = j+1
+
 coinsCollect = mutableInt()
-levelmap = mutableLevelMap(level)
+for i in range(len(gorizontaldoors)):
+    if i == 0:
+        cnt = ''
+    else:
+        cnt = f'{i}'
+    gorizontaldoors[i].connect(cnt, levers[i], "lever")
+verticaldoors[0].connect('', buttons, "button", 2)
+#levelmap = mutableLevelMap(level)
 if __name__ == "__main__":
     running = True
     flag = False
@@ -202,8 +214,9 @@ if __name__ == "__main__":
     pygame.display.set_caption("Свой курсор мыши")
     image = load_image("background_lvl_1.jpg")
     image = pygame.transform.scale(image, (1200, 800))
-    eventt = None
+    
     while running:
+        eventt = None
         # cnt+=1
         # if cnt>3:
         #     cnt=0
@@ -233,10 +246,15 @@ if __name__ == "__main__":
         all_sprites_coins.update(eventt, mag=mag, robber=robber, coinsCollect=coinsCollect)
         all_sprites_magicdoor.update(eventt, mag=mag, levelMap=level)
         all_sprites_verticaldoors.draw(screen)
+        all_sprites_lever.update(eventt, mag=mag, robber=robber)
+        all_sprites_button.update(eventt, mag=mag, robber=robber)
         #mag.draw(screen)
         # screen.blit(mag.image, (mag.xpos, mag.ypos))
         # mag.falling(level)
         # all_sprites_mag[0].falling(level)
+        for i in gorizontaldoors:
+            i.check(level)
+        verticaldoors[0].check(level)
         printtext(str(mag.left_x)+" "+str(mag.right_x)+" "+str(mag.top_y)+" "+str(mag.bottom_y))
         clock.tick(120)
         pygame.display.flip()
