@@ -3,6 +3,8 @@ import pygame
 import os
 import sys
 
+import commonConsts
+
 
 
 
@@ -256,7 +258,7 @@ if __name__ == "__main__":
             i.check(level)
         verticaldoors[0].check(level)
         printtext(str(mag.left_x)+" "+str(mag.right_x)+" "+str(mag.top_y)+" "+str(mag.bottom_y))
-        clock.tick(120)
+        clock.tick(commonConsts.FPS)
         pygame.display.flip()
     
     pygame.quit()

@@ -1,0 +1,2 @@
+BLOCK_SIZE = 40
+FPS = 120
