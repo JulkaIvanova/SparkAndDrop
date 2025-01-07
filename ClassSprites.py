@@ -24,8 +24,8 @@ def checkList(list):
     return False
 
 class GameSprite(pygame.sprite.Sprite):
-    def __init__(self, *group, image, x, y, width=0, height=0):
-        super.__init__(*group)
+    def __init__(self, image: pygame.Surface, x: int, y: int, *group, width=0, height=0, ):
+        super().__init__(*group)
         self.image = image
         if (width>0) or (height>0):
             if width==0:
@@ -38,42 +38,28 @@ class GameSprite(pygame.sprite.Sprite):
         self.rect.y = y
     
     def get_left_cell_x(self):
-        pass
+        return int(self.rect.left // commonConsts.BLOCK_SIZE)
 
     def get_right_cell_x(self):
-        pass
+        return int(self.rect.right // commonConsts.BLOCK_SIZE)
 
     def get_top_cell_y(self):
-        pass
+        return int(self.rect.top // commonConsts.BLOCK_SIZE)
 
     def get_bottom_cell_y(self):
-        pass
+        return int(self.rect.bottom // commonConsts.BLOCK_SIZE)
 
-class Block(pygame.sprite.Sprite):
+class Block(GameSprite):
     image = load_image("blok.jpg")
 
     def __init__(self, *group, x, y):
-        # НЕОБХОДИМО вызвать конструктор родительского класса Sprite. 
-        # Это очень важно!!!
-        super().__init__(*group)
-        self.image = Block.image
-        self.image = pygame.transform.scale(self.image, (40, 40))
-        self.rect = self.image.get_rect()
-        self.rect.x = x
-        self.rect.y = y
+        super().__init__(Block.image, x, y, *group, width= 40)
 
-class Coin(pygame.sprite.Sprite):
+class Coin(GameSprite):
     image = load_image("coin.png")
 
     def __init__(self, *group, x, y):
-        # НЕОБХОДИМО вызвать конструктор родительского класса Sprite. 
-        # Это очень важно!!!
-        super().__init__(*group)
-        self.image = Coin.image
-        self.image = pygame.transform.scale(self.image, (40, 40))
-        self.rect = self.image.get_rect()
-        self.rect.x = x
-        self.rect.y = y
+        super().__init__(Coin.image, x, y, *group, width= 40)
     
     def update(self, *args, mag, robber, coinsCollect):
         if pygame.sprite.collide_mask(self, mag) or pygame.sprite.collide_mask(self, robber):
@@ -81,33 +67,19 @@ class Coin(pygame.sprite.Sprite):
             coinsCollect.cnt += 1
             
 
-class Door(pygame.sprite.Sprite):
+class Door(GameSprite):
     image = load_image("door.png")
 
     def __init__(self, *group, x, y):
-        # НЕОБХОДИМО вызвать конструктор родительского класса Sprite. 
-        # Это очень важно!!!
-        super().__init__(*group)
-        self.image = Door.image
-        self.image = pygame.transform.scale(self.image, (40, 80))
-        self.rect = self.image.get_rect()
-        self.rect.x = x
-        self.rect.y = y
+        super().__init__(Door.image, x, y, *group, width= 40, height= 80)
         self.win = False
 
 
-class MagicDoor(pygame.sprite.Sprite):
+class MagicDoor(GameSprite):
     image = load_image("magicdoor.png")
 
     def __init__(self, *group, x, y):
-        # НЕОБХОДИМО вызвать конструктор родительского класса Sprite. 
-        # Это очень важно!!!
-        super().__init__(*group)
-        self.image = MagicDoor.image
-        self.image = pygame.transform.scale(self.image, (40, 80))
-        self.rect = self.image.get_rect()
-        self.rect.x = x
-        self.rect.y = y
+        super().__init__(MagicDoor.image, x, y, *group, width= 40, height= 80)
         # self.open = False
     
     def update(self, *args, mag, levelMap):
@@ -121,65 +93,39 @@ class MagicDoor(pygame.sprite.Sprite):
                 levelMap[int(self.rect.y//40)+1] = levelMap[int(self.rect.y//40)+1][:int(self.rect.x//40)]+"."+levelMap[int(self.rect.y//40)+1][int(self.rect.x//40)+1:]
                 self.kill()
 
-class Button(pygame.sprite.Sprite):
+class Button(GameSprite):
     image = load_image("button.png")
 
     def __init__(self, *group, x, y):
-        # НЕОБХОДИМО вызвать конструктор родительского класса Sprite. 
-        # Это очень важно!!!
-        super().__init__(*group)
-        self.image = Button.image
-        self.image = pygame.transform.scale(self.image, (40, 40))
-        self.rect = self.image.get_rect()
-        self.rect.x = x
-        self.rect.y = y
+        super().__init__(Button.image, x, y, *group, width= 40)
         self.activate = False
     
     def update(self, *args, mag, robber):
         if args and ((pygame.sprite.collide_mask(self, mag) and pygame.key.get_pressed()[pygame.K_q]) or (pygame.sprite.collide_mask(self, robber) and pygame.key.get_pressed()[pygame.K_u])):
-            if not self.activate:
-                print(2)
             self.activate = True
         else:
-            if self.activate:
-                print(1)
             self.activate = False
 
-class Lever(pygame.sprite.Sprite):
+class Lever(GameSprite):
     image = load_image("lever.png")
 
     def __init__(self, *group, x, y):
-        # НЕОБХОДИМО вызвать конструктор родительского класса Sprite. 
-        # Это очень важно!!!
-        super().__init__(*group)
-        self.image = Lever.image
-        self.image = pygame.transform.scale(self.image, (40, 40))
-        self.rect = self.image.get_rect()
-        self.rect.x = x
-        self.rect.y = y
+        super().__init__(Lever.image, x, y, *group, width= 40)
         self.activate = False
 
     def update(self, *args, mag, robber):
         if not(args[0] is None):
             if ((pygame.sprite.collide_mask(self, mag) and pygame.KEYDOWN and args[0].key == pygame.K_q) or (pygame.sprite.collide_mask(self, robber) and pygame.KEYDOWN and args[0].key == pygame.K_u)):
-                print(1)
                 if self.activate:
                     self.activate = False
                 else:
                     self.activate = True
 
-class GorizontalDoor(pygame.sprite.Sprite):
+class GorizontalDoor(GameSprite):
     image = load_image("gorizontaldoor.png")
 
     def __init__(self, *group, x, y):
-        # НЕОБХОДИМО вызвать конструктор родительского класса Sprite. 
-        # Это очень важно!!!
-        super().__init__(*group)
-        self.image = GorizontalDoor.image
-        self.image = pygame.transform.scale(self.image, (80, 40))
-        self.rect = self.image.get_rect()
-        self.rect.x = x
-        self.rect.y = y
+        super().__init__(GorizontalDoor.image, x, y, *group, width= 80, height= 40)
         self.button = []
         self.y = int(self.rect.y//40)
         self.x = int(self.rect.x//40)
@@ -212,18 +158,11 @@ class GorizontalDoor(pygame.sprite.Sprite):
             # for i in self.button:
             #     print(i.activate)
 
-class VerticalDoor(pygame.sprite.Sprite):
+class VerticalDoor(GameSprite):
     image = load_image("verticaldoor.png")
 
     def __init__(self, *group, x, y):
-        # НЕОБХОДИМО вызвать конструктор родительского класса Sprite. 
-        # Это очень важно!!!
-        super().__init__(*group)
-        self.image = VerticalDoor.image
-        self.image = pygame.transform.scale(self.image, (40, 80))
-        self.rect = self.image.get_rect()
-        self.rect.x = x
-        self.rect.y = y
+        super().__init__(VerticalDoor.image, x, y, *group, width= 40, height= 80)
         self.button = []
         self.y = int(self.rect.y//40)
         self.x = int(self.rect.x//40)
@@ -257,18 +196,11 @@ class VerticalDoor(pygame.sprite.Sprite):
             # for i in self.button:
             #     print(i.activate)
 
-class Monsters(pygame.sprite.Sprite):
+class Monsters(GameSprite):
     image = load_image("monster.png")
 
     def __init__(self, *group, x, y, clock):
-        # НЕОБХОДИМО вызвать конструктор родительского класса Sprite. 
-        # Это очень важно!!!
-        super().__init__(*group)
-        self.image = Monsters.image
-        self.image = pygame.transform.scale(self.image, (40, 40))
-        self.rect = self.image.get_rect()
-        self.rect.x = x
-        self.rect.y = y
+        super().__init__(Monsters.image, x, y, *group, width= 40, height= 40)
         self.xpos = x
         self.ypos = y
         self.clock = clock
@@ -304,27 +236,21 @@ class Monsters(pygame.sprite.Sprite):
                 self.image = pygame.transform.flip(self.image, True, False)
 
 
-class Mag(pygame.sprite.Sprite):
+class Mag(GameSprite):
+    image = load_image("mag.png")
+
     def __init__(self, *group, x, y, clock):
-        # НЕОБХОДИМО вызвать конструктор родительского класса Sprite. 
-        # Это очень важно!!!
-        super().__init__(*group)
+        super().__init__(Mag.image, x, y, *group, width= 40)
        
         self.alive = True
-        self.image = load_image("mag.png")
-        self.image = pygame.transform.scale(self.image, (40, 40))
-        self.rect = self.image.get_rect()
-        self.rect.x = x
-        self.rect.y = y
         self.xpos = x
         self.ypos = y
         self.clock = clock
         self.jump_in_progress = False
         self.vertical_velocity = 0
         self.is_flipped = False
-        self.image_original = load_image("mag.png")  # Оригинальное изображение
-        self.image_original = pygame.transform.scale(self.image_original, (40, 40))
-        self.image = self.image_original
+        self.image_original = pygame.transform.scale(self.image, (40, 40))
+
     def update(self, *args, levelMap):
         #if args and (args[0].type == pygame.KEYDOWN):
         #    print(args[0].key, pygame.K_d)
@@ -445,17 +371,13 @@ class Mag(pygame.sprite.Sprite):
     #         self.clock.tick(commonConsts.FPS)
     #         self.rect.top = self.ypos
 
-class Robber(pygame.sprite.Sprite):
+class Robber(GameSprite):
+    image = load_image("robber.png")
+
     def __init__(self, *group, x, y):
-        # НЕОБХОДИМО вызвать конструктор родительского класса Sprite. 
-        # Это очень важно!!!
-        super().__init__(*group)
+        super().__init__(Robber.image, x, y, *group, width= 40, height= 80)
         self.alive = True
-        self.image = load_image("robber.png")
-        self.image = pygame.transform.scale(self.image, (40, 80))
-        self.rect = self.image.get_rect()
-        self.rect.x = x
-        self.rect.y = y
+
     # def update(self):
     #     if args and args[0].type == pygame.MOUSEBUTTONDOWN:
     #         self.image = self.image_boom
