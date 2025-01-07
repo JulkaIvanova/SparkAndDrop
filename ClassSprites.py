@@ -24,7 +24,7 @@ def checkList(list):
     return False
 
 class GameSprite(pygame.sprite.Sprite):
-    def __init__(self, image: pygame.Surface, x: int, y: int, *group, width=0, height=0, ):
+    def __init__(self, image: pygame.Surface, x: int, y: int, *group, width=0, height=0):
         super().__init__(*group)
         self.image = image
         if (width>0) or (height>0):
@@ -37,17 +37,137 @@ class GameSprite(pygame.sprite.Sprite):
         self.rect.x = x
         self.rect.y = y
     
-    def get_left_cell_x(self):
-        return int(self.rect.left // commonConsts.BLOCK_SIZE)
+    def get_left_cell_x(self, offset = 0):
+        return int((self.rect.left + offset) // commonConsts.BLOCK_SIZE)
 
-    def get_right_cell_x(self):
-        return int(self.rect.right // commonConsts.BLOCK_SIZE)
+    def get_right_cell_x(self, offset = 0):
+        return int((self.rect.right - 1 + offset) // commonConsts.BLOCK_SIZE)
 
-    def get_top_cell_y(self):
-        return int(self.rect.top // commonConsts.BLOCK_SIZE)
+    def get_top_cell_y(self, offset = 0):
+        return int((self.rect.top + offset) // commonConsts.BLOCK_SIZE)
 
-    def get_bottom_cell_y(self):
-        return int(self.rect.bottom // commonConsts.BLOCK_SIZE)
+    def get_bottom_cell_y(self, offset = 0):
+        return int((self.rect.bottom - 1 + offset) // commonConsts.BLOCK_SIZE)
+    
+    # Следующие 4 функции принимают на вход иддекс блока и выравнивают по нему левый, правый, верхний или нижний край спрайта
+    def set_left_cell_x(self, value):
+        self.rect.left = value * commonConsts.BLOCK_SIZE
+
+    def set_right_cell_x(self, value):
+        self.rect.right = value * commonConsts.BLOCK_SIZE + commonConsts.BLOCK_SIZE - 1
+
+    def set_top_cell_y(self, value):
+        self.rect.top = value * commonConsts.BLOCK_SIZE
+
+    def set_bottom_cell_y(self, value):
+        self.rect.bottom = value * commonConsts.BLOCK_SIZE + commonConsts.BLOCK_SIZE - 1
+    
+class  MovableGameSprite(GameSprite):
+    def __init__(self, image: pygame.Surface, x: int, y: int, *group, level_map, width=0, height=0, hspeed=0, vspeed=0, right_direction = False, left_direction_image: pygame.Surface = None):
+        super().__init__(image, x, y, *group, width= width, height=height)
+        self.hspeed = hspeed
+        self.vspeed = vspeed
+        self.level_map = level_map
+        self.right_image = self.image
+        self.left_image = left_direction_image
+        if self.left_image == None:
+            self.left_image = pygame.transform.flip(self.image, True, False)
+
+        self.set_direction(right_direction)
+
+    def change_direction(self):
+        self.set_direction(not self.right_direction)
+        
+
+    def set_direction(self, right: bool):
+        self.right_direction = right
+        if self.right_direction:
+            self.image = self.right_image
+        else:
+            self.image = self.left_image
+    
+    def can_move(self, block_content):
+        return True
+    
+    def can_stay(self, block_content):
+        return True
+    
+    def can_jump_through(self, block_content):
+        return self.can_stay(block_content)
+    
+    def fall(self):
+        pass
+
+    def jump(self):
+        pass
+
+    def move(self, can_fall = True, flip_on_stop = False, distance = 0):
+        if distance == 0:
+            distance = self.hspeed // commonConsts.FPS  # При таком подходе скорость спрайта должна быть кратна fps, иначе она будет урезаться
+        if distance == 0:
+            return    
+        
+        #Пока предполагаем, что максимальная высота спрайта два блока
+        full_distance = True
+        offset=0
+        last_success_right = self.get_right_cell_x()
+        last_success_left = self.get_right_cell_x()
+        while offset<distance:
+            offset+=commonConsts.BLOCK_SIZE
+            if offset>distance:
+                offset = distance
+            if self.right_direction:    
+                right = self.get_right_cell_x(offset)
+                left = self.get_left_cell_x(offset)
+            else:
+                right = self.get_right_cell_x(-offset)
+                left = self.get_left_cell_x(-offset)
+            # Если блок в котором находится спрайт не изменится, то проверки не нужны
+            if right == self.get_right_cell_x() and left == self.get_left_cell_x():
+                continue
+            
+            if self.right_direction:
+                block_front = right
+                block_back = left    
+            else:
+                block_back = right
+                block_front = left
+
+            if not self.can_move(self.level_map[self.get_bottom_cell_y()][block_front]) or not self.can_move(self.level_map[self.get_top_cell_y()][block_front]):
+                full_distance = False
+                if self.right_direction:
+                    self.set_right_cell_x(last_success_right)
+                else:
+                    self.set_left_cell_x(last_success_left)
+                if flip_on_stop:
+                    self.change_direction()
+                break
+            if not self.can_stay(self.level_map[self.get_bottom_cell_y()+1][block_front]):
+                if not can_fall:
+                    full_distance = False
+                    if self.right_direction:
+                        self.set_right_cell_x(last_success_right)
+                    else:
+                        self.set_left_cell_x(last_success_left)
+                    if flip_on_stop:
+                        self.change_direction()
+                        break
+                else:
+                    if not self.can_stay(self.level_map[self.get_bottom_cell_y()+1][block_back]):
+                        full_distance = False
+                        self.set_right_cell_x(right)
+                        self.fall()
+                        break
+            last_success_right = right
+            last_success_left = left
+                
+        if full_distance:
+            if self.right_direction:
+                self.rect.left = self.rect.left + distance
+            else:
+                self.rect.left = self.rect.left - distance
+
+    
 
 class Block(GameSprite):
     image = load_image("blok.jpg")
@@ -127,8 +247,6 @@ class GorizontalDoor(GameSprite):
     def __init__(self, *group, x, y):
         super().__init__(GorizontalDoor.image, x, y, *group, width= 80, height= 40)
         self.button = []
-        self.y = int(self.rect.y//40)
-        self.x = int(self.rect.x//40)
         self.imghide = load_image(f"hide.png")
     
     def connect(self, cnt, objectt, typetext, cntbuttons=None):
@@ -149,11 +267,11 @@ class GorizontalDoor(GameSprite):
         if checkList(self.button):
             # levelMap[int(y//40)] = levelMap[int(y//40)][:int(x//40)]+"."+levelMap[int(y//40)][int(x//40)+1:]
             # levelMap[int(y//40)+1] = levelMap[int(y//40)+1][:int(x//40)]+"."+levelMap[int(y//40)+1][int(x//40)+1:]
-            levelMap[self.y] = levelMap[self.y][:self.x]+".."+levelMap[self.y][self.x+2:]
+            levelMap[self.get_top_cell_y()] = levelMap[self.get_top_cell_y()][:self.get_left_cell_x()]+".."+levelMap[self.get_top_cell_y()][self.get_left_cell_x()+2:]
             self.image = self.imghide
             #print("\n".join(levelMap))
         else:
-            levelMap[self.y] = levelMap[self.y][:self.x]+"--"+levelMap[self.y][self.x+2:]
+            levelMap[self.get_top_cell_y()] = levelMap[self.get_top_cell_y()][:self.get_left_cell_x()]+"--"+levelMap[self.get_top_cell_y()][self.get_left_cell_x()+2:]
             self.image = self.image_original
             # for i in self.button:
             #     print(i.activate)
@@ -164,8 +282,6 @@ class VerticalDoor(GameSprite):
     def __init__(self, *group, x, y):
         super().__init__(VerticalDoor.image, x, y, *group, width= 40, height= 80)
         self.button = []
-        self.y = int(self.rect.y//40)
-        self.x = int(self.rect.x//40)
         self.imghide = load_image(f"hide.png")
     
     def connect(self, cnt, objectt, typetext, cntbuttons=None):
@@ -185,67 +301,83 @@ class VerticalDoor(GameSprite):
             
     def check(self, levelMap):
         if checkList(self.button):
-            levelMap[self.y] = levelMap[self.y][:self.x]+"."+levelMap[self.y][self.x+1:]
-            levelMap[self.y+1] = levelMap[self.y+1][:self.x]+"."+levelMap[self.y+1][self.x+1:]
+            levelMap[self.get_top_cell_y()] = levelMap[self.get_top_cell_y()][:self.get_left_cell_x()]+"."+levelMap[self.get_top_cell_y()][self.get_left_cell_x()+1:]
+            levelMap[self.get_top_cell_y()+1] = levelMap[self.get_top_cell_y()+1][:self.get_left_cell_x()]+"."+levelMap[self.get_top_cell_y()+1][self.get_left_cell_x()+1:]
             self.image = self.imghide
             #print("\n".join(levelMap))
         else:
-            levelMap[self.y] = levelMap[self.y][:self.x]+"|"+levelMap[self.y][self.x+1:]
-            levelMap[self.y+1] = levelMap[self.y+1][:self.x]+"|"+levelMap[self.y+1][self.x+1:]
+            levelMap[self.get_top_cell_y()] = levelMap[self.get_top_cell_y()][:self.get_left_cell_x()]+"|"+levelMap[self.get_top_cell_y()][self.get_left_cell_x()+1:]
+            levelMap[self.get_top_cell_y()+1] = levelMap[self.get_top_cell_y()+1][:self.get_left_cell_x()]+"|"+levelMap[self.get_top_cell_y()+1][self.get_left_cell_x()+1:]
             self.image = self.image_original
             # for i in self.button:
             #     print(i.activate)
 
-class Monsters(GameSprite):
+# class Monsters(GameSprite):
+#     image = load_image("monster.png")
+
+#     def __init__(self, *group, x, y):
+#         super().__init__(Monsters.image, x, y, *group, width= 40, height= 40)
+#         self.xpos = x
+#         self.ypos = y
+
+#         self.rightFlag = False
+    
+#     def update(self, *args, mag, robber, levelMap):
+#         self.v = 120
+#         #BLOCK_SIZE = 40
+#         left_x = int(self.xpos // commonConsts.BLOCK_SIZE)
+#         right_x = int((self.xpos + self.rect.width - 1) // commonConsts.BLOCK_SIZE)  # Учитываем правый край
+#         bottom_y = int((self.ypos + self.rect.height) // commonConsts.BLOCK_SIZE)
+#         if pygame.sprite.collide_mask(self, mag):
+#             mag.alive = False
+#         # if self.rightFlag:
+#         #     if (mag.xpos+40 == self.xpos or mag.xpos == self.xpos) and int(mag.ypos//40) == int(self.ypos//40):
+#         #         mag.alive = False
+#         # else:
+#         #     if (mag.xpos+40 == self.xpos+40 or mag.xpos == self.xpos+40) and int(mag.ypos//40) == int(self.ypos//40):
+#         #         mag.alive = False
+#         if self.rightFlag==False:
+#             if levelMap[int(self.ypos//40)][int(self.xpos//40)+1] in ".@$7X" and levelMap[int(self.ypos//40)+1][int(self.xpos//40)+1] in "#-":
+#                 self.xpos += self.v/commonConsts.FPS
+#                 self.rect.left = self.xpos
+#             else:
+#                 self.image = pygame.transform.flip(self.image, True, False)
+#                 self.rightFlag = True
+#         if self.rightFlag:
+#             if levelMap[int(self.ypos//40)][int(self.xpos//40)] in ".@$7X" and levelMap[int(self.ypos//40)+1][int(self.xpos//40)] in "#-":
+#                 self.xpos -= self.v/commonConsts.FPS
+#                 self.rect.left = self.xpos
+#             else:
+#                 self.rightFlag = False
+#                 self.image = pygame.transform.flip(self.image, True, False)
+
+class Monsters(MovableGameSprite):
     image = load_image("monster.png")
 
-    def __init__(self, *group, x, y, clock):
-        super().__init__(Monsters.image, x, y, *group, width= 40, height= 40)
-        self.xpos = x
-        self.ypos = y
-        self.clock = clock
-        self.rightFlag = False
+    def __init__(self, *group, x, y, levelMap):
+        super().__init__(Monsters.image, x, y, *group, width= 40, height= 40, level_map=levelMap, hspeed=120)
     
+    def can_move(self, block_content):
+        return block_content in ".@$7X"
+    
+    def can_stay(self, block_content):
+        return block_content in "#-"
+
     def update(self, *args, mag, robber, levelMap):
-        self.v = 120
-        #BLOCK_SIZE = 40
-        left_x = int(self.xpos // commonConsts.BLOCK_SIZE)
-        right_x = int((self.xpos + self.rect.width - 1) // commonConsts.BLOCK_SIZE)  # Учитываем правый край
-        bottom_y = int((self.ypos + self.rect.height) // commonConsts.BLOCK_SIZE)
         if pygame.sprite.collide_mask(self, mag):
             mag.alive = False
-        # if self.rightFlag:
-        #     if (mag.xpos+40 == self.xpos or mag.xpos == self.xpos) and int(mag.ypos//40) == int(self.ypos//40):
-        #         mag.alive = False
-        # else:
-        #     if (mag.xpos+40 == self.xpos+40 or mag.xpos == self.xpos+40) and int(mag.ypos//40) == int(self.ypos//40):
-        #         mag.alive = False
-        if self.rightFlag==False:
-            if levelMap[int(self.ypos//40)][int(self.xpos//40)+1] in ".@$7X" and levelMap[int(self.ypos//40)+1][int(self.xpos//40)+1] in "#-":
-                self.xpos += self.v/commonConsts.FPS
-                self.rect.left = self.xpos
-            else:
-                self.image = pygame.transform.flip(self.image, True, False)
-                self.rightFlag = True
-        if self.rightFlag:
-            if levelMap[int(self.ypos//40)][int(self.xpos//40)] in ".@$7X" and levelMap[int(self.ypos//40)+1][int(self.xpos//40)] in "#-":
-                self.xpos -= self.v/commonConsts.FPS
-                self.rect.left = self.xpos
-            else:
-                self.rightFlag = False
-                self.image = pygame.transform.flip(self.image, True, False)
+        self.move(False, True)
 
 
 class Mag(GameSprite):
     image = load_image("mag.png")
 
-    def __init__(self, *group, x, y, clock):
+    def __init__(self, *group, x, y):
         super().__init__(Mag.image, x, y, *group, width= 40)
        
         self.alive = True
         self.xpos = x
         self.ypos = y
-        self.clock = clock
         self.jump_in_progress = False
         self.vertical_velocity = 0
         self.is_flipped = False

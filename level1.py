@@ -158,11 +158,11 @@ for i in range(len(level)):
         elif level[i][j] == "@":
             robber = ClassSprites.Robber(all_sprites_robber, x = j*40, y = i*40)
         elif level[i][j] == "$":
-            mag = ClassSprites.Mag(all_sprites_mag, x = j*40, y = i*40, clock=clock)
+            mag = ClassSprites.Mag(all_sprites_mag, x = j*40, y = i*40)
         elif level[i][j] == "|":
             verticaldoors.append(ClassSprites.VerticalDoor(all_sprites_verticaldoors, x = j*40, y = i*40))
         elif level[i][j] == "X":
-            ClassSprites.Monsters(all_monsterss, x = j*40, y = i*40, clock=clock)
+            ClassSprites.Monsters(all_monsterss, x = j*40, y = i*40, levelMap=level)
             
 d = -1
 k = -1
