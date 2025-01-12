@@ -158,7 +158,7 @@ for i in range(len(level)):
         elif level[i][j] == "@":
             robber = ClassSprites.Robber(all_sprites_robber, x = j*40, y = i*40)
         elif level[i][j] == "$":
-            mag = ClassSprites.Mag(all_sprites_mag, x = j*40, y = i*40)
+            mag = ClassSprites.Mag(all_sprites_mag, x = j*40, y = i*40, levelMap=level)
         elif level[i][j] == "|":
             verticaldoors.append(ClassSprites.VerticalDoor(all_sprites_verticaldoors, x = j*40, y = i*40))
         elif level[i][j] == "X":
@@ -257,7 +257,7 @@ if __name__ == "__main__":
         for i in gorizontaldoors:
             i.check(level)
         verticaldoors[0].check(level)
-        printtext(str(mag.left_x)+" "+str(mag.right_x)+" "+str(mag.top_y)+" "+str(mag.bottom_y))
+        printtext(str(mag.get_left_cell_x())+" "+str(mag.get_right_cell_x())+" "+str(mag.get_top_cell_y())+" "+str(mag.get_bottom_cell_y()))
         clock.tick(commonConsts.FPS)
         pygame.display.flip()
     

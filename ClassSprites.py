@@ -96,7 +96,10 @@ class  MovableGameSprite(GameSprite):
         return self.can_stay(block_content)
     
     def fall(self):
-        pass
+        if self.can_stay(self.level_map[self.get_bottom_cell_y(1)][self.get_left_cell_x()]) or self.can_stay(self.level_map[self.get_bottom_cell_y(1)][self.get_right_cell_x()]):
+            return
+        self.rect.top += 400 / commonConsts.FPS
+        
 
     def jump(self):
         pass
@@ -155,7 +158,10 @@ class  MovableGameSprite(GameSprite):
                 else:
                     if not self.can_stay(self.level_map[self.get_bottom_cell_y()+1][block_back]):
                         full_distance = False
-                        self.set_right_cell_x(right)
+                        if self.right_direction:
+                            self.set_right_cell_x(right)
+                        else:
+                            self.set_left_cell_x(left)
                         self.fall()
                         break
             last_success_right = right
@@ -312,44 +318,6 @@ class VerticalDoor(GameSprite):
             # for i in self.button:
             #     print(i.activate)
 
-# class Monsters(GameSprite):
-#     image = load_image("monster.png")
-
-#     def __init__(self, *group, x, y):
-#         super().__init__(Monsters.image, x, y, *group, width= 40, height= 40)
-#         self.xpos = x
-#         self.ypos = y
-
-#         self.rightFlag = False
-    
-#     def update(self, *args, mag, robber, levelMap):
-#         self.v = 120
-#         #BLOCK_SIZE = 40
-#         left_x = int(self.xpos // commonConsts.BLOCK_SIZE)
-#         right_x = int((self.xpos + self.rect.width - 1) // commonConsts.BLOCK_SIZE)  # Учитываем правый край
-#         bottom_y = int((self.ypos + self.rect.height) // commonConsts.BLOCK_SIZE)
-#         if pygame.sprite.collide_mask(self, mag):
-#             mag.alive = False
-#         # if self.rightFlag:
-#         #     if (mag.xpos+40 == self.xpos or mag.xpos == self.xpos) and int(mag.ypos//40) == int(self.ypos//40):
-#         #         mag.alive = False
-#         # else:
-#         #     if (mag.xpos+40 == self.xpos+40 or mag.xpos == self.xpos+40) and int(mag.ypos//40) == int(self.ypos//40):
-#         #         mag.alive = False
-#         if self.rightFlag==False:
-#             if levelMap[int(self.ypos//40)][int(self.xpos//40)+1] in ".@$7X" and levelMap[int(self.ypos//40)+1][int(self.xpos//40)+1] in "#-":
-#                 self.xpos += self.v/commonConsts.FPS
-#                 self.rect.left = self.xpos
-#             else:
-#                 self.image = pygame.transform.flip(self.image, True, False)
-#                 self.rightFlag = True
-#         if self.rightFlag:
-#             if levelMap[int(self.ypos//40)][int(self.xpos//40)] in ".@$7X" and levelMap[int(self.ypos//40)+1][int(self.xpos//40)] in "#-":
-#                 self.xpos -= self.v/commonConsts.FPS
-#                 self.rect.left = self.xpos
-#             else:
-#                 self.rightFlag = False
-#                 self.image = pygame.transform.flip(self.image, True, False)
 
 class Monsters(MovableGameSprite):
     image = load_image("monster.png")
@@ -369,11 +337,11 @@ class Monsters(MovableGameSprite):
         self.move(False, True)
 
 
-class Mag(GameSprite):
+class Mag(MovableGameSprite):
     image = load_image("mag.png")
 
-    def __init__(self, *group, x, y):
-        super().__init__(Mag.image, x, y, *group, width= 40)
+    def __init__(self, *group, x, y, levelMap):
+        super().__init__(Mag.image, x, y, *group, width= 40, height= 40, level_map=levelMap, hspeed=240)
        
         self.alive = True
         self.xpos = x
@@ -383,11 +351,22 @@ class Mag(GameSprite):
         self.is_flipped = False
         self.image_original = pygame.transform.scale(self.image, (40, 40))
 
+    def can_move(self, block_content):
+        return block_content in [".", "$", "@", "X", "7", "*", "0"]
+    
+    def can_stay(self, block_content):
+        return not (block_content in [".", "$", "@", "X", "7", "*", "0"])
+
     def update(self, *args, levelMap):
-        #if args and (args[0].type == pygame.KEYDOWN):
-        #    print(args[0].key, pygame.K_d)
-        #if args and (args[0].type == pygame.KEYDOWN) and (args[0].key == pygame.K_d):
-        self.v = 240
+        self.fall()
+        self.jump()
+        if args and pygame.key.get_pressed()[pygame.K_d]:
+            self.set_direction(True)
+            self.move()
+        if args and pygame.key.get_pressed()[pygame.K_a]:
+            self.set_direction(False)
+            self.move()
+        return    
 
         # Проверка нижних углов персонажа
         self.left_x = int(self.xpos // commonConsts.BLOCK_SIZE)
