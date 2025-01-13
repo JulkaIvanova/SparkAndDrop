@@ -162,7 +162,7 @@ for i in range(len(level)):
         elif level[i][j] == "|":
             verticaldoors.append(ClassSprites.VerticalDoor(all_sprites_verticaldoors, x = j*40, y = i*40))
         elif level[i][j] == "X":
-            ClassSprites.Monsters(all_monsterss, x = j*40, y = i*40, levelMap=level)
+            ClassSprites.Monsters(all_monsterss, x = j*40, y = i*40, levelMap=level, mag=mag, robber=robber)
             
 d = -1
 k = -1
@@ -243,8 +243,8 @@ if __name__ == "__main__":
         all_monsterss.draw(screen)
         #board.render(screen)
         #if cnt==0:
-        all_sprites_mag.update(eventt, levelMap=level)
-        all_monsterss.update(eventt, mag=mag, robber=robber, levelMap=level)
+        all_sprites_mag.update(eventt)
+        all_monsterss.update(eventt)
         all_sprites_coins.update(eventt, mag=mag, robber=robber, coinsCollect=coinsCollect)
         all_sprites_magicdoor.update(eventt, mag=mag, levelMap=level)
         all_sprites_verticaldoors.draw(screen)

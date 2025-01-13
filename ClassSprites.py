@@ -63,13 +63,16 @@ class GameSprite(pygame.sprite.Sprite):
         self.rect.bottom = value * commonConsts.BLOCK_SIZE + commonConsts.BLOCK_SIZE
     
 class  MovableGameSprite(GameSprite):
-    def __init__(self, image: pygame.Surface, x: int, y: int, *group, level_map, width=0, height=0, hspeed=0, vspeed=0, right_direction = False, left_direction_image: pygame.Surface = None):
+    def __init__(self, image: pygame.Surface, x: int, y: int, *group, level_map, width=0, height=0, hspeed=0, vspeed=400, jump_height=3*commonConsts.BLOCK_SIZE, right_direction = False, left_direction_image: pygame.Surface = None):
         super().__init__(image, x, y, *group, width= width, height=height)
         self.hspeed = hspeed
         self.vspeed = vspeed
         self.level_map = level_map
         self.right_image = self.image
         self.left_image = left_direction_image
+        self.jump_height = jump_height
+        self.current_jump_height = 0
+        self.jump_in_progress = False
         if self.left_image == None:
             self.left_image = pygame.transform.flip(self.image, True, False)
 
@@ -93,10 +96,13 @@ class  MovableGameSprite(GameSprite):
         return True
     
     def can_jump_through(self, block_content):
-        return self.can_stay(block_content)
+        return not self.can_stay(block_content)
     
     def fall(self):
-        distance = 400 / commonConsts.FPS
+        if self.jump_in_progress:
+            return
+        
+        distance = self.vspeed / commonConsts.FPS
         offset = 0
         if self.can_stay(self.level_map[self.get_bottom_cell_y(1)][self.get_left_cell_x()]) or self.can_stay(self.level_map[self.get_bottom_cell_y(1)][self.get_right_cell_x()]):
             return
@@ -116,10 +122,56 @@ class  MovableGameSprite(GameSprite):
         else:
             self.set_bottom_cell_y(self.get_bottom_cell_y(1)+blocks)
 
+    def _process_jump(self):
+        if not self.jump_in_progress:
+            return
         
+        if not self.can_jump_through(self.level_map[self.get_top_cell_y(-1)][self.get_left_cell_x()]) or \
+           not self.can_jump_through(self.level_map[self.get_top_cell_y(-1)][self.get_right_cell_x()]) or \
+            self.current_jump_height>=self.jump_height:
+            self.jump_in_progress = False
+            self.current_jump_height = 0
+            return
+
+        distance = self.vspeed / commonConsts.FPS
+        if (self.current_jump_height+distance)>self.jump_height:
+            distance = self.jump_height - self.current_jump_height
+
+        full_distance = True
+        blocks = 0
+        offset = 0
+        while offset<distance:
+            offset+=commonConsts.BLOCK_SIZE
+            if offset>distance:
+                offset = distance
+            if not self.can_jump_through(self.level_map[self.get_top_cell_y(-offset)][self.get_left_cell_x()]) or \
+               not self.can_jump_through(self.level_map[self.get_top_cell_y(-offset)][self.get_right_cell_x()]):
+                full_distance = False
+                break
+            blocks+=1
+        if full_distance:
+            self.rect.top -= distance
+            self.current_jump_height +=distance
+            if self.current_jump_height>=self.jump_height:
+                self.jump_in_progress = False
+                self.current_jump_height = 0
+        else:
+            self.set_top_cell_y(self.get_top_cell_y()-blocks)
+            self.jump_in_progress = False
+            self.current_jump_height = 0
+        
+    def do_update(self):
+        pass
 
     def jump(self):
-        pass
+        if self.jump_in_progress:
+            return
+        
+        if not self.can_stay(self.level_map[self.get_bottom_cell_y(1)][self.get_left_cell_x()]) and not self.can_stay(self.level_map[self.get_bottom_cell_y(1)][self.get_right_cell_x()]):
+            return
+
+        self.jump_in_progress = True
+        self._process_jump()
 
     def move(self, can_fall = True, flip_on_stop = False, distance = 0):
         if distance == 0:
@@ -191,6 +243,11 @@ class  MovableGameSprite(GameSprite):
                 self.rect.left = self.rect.left - distance
 
     
+    def update(self, *args):
+        self.fall()
+        self._process_jump()
+        self.do_update(*args)   
+
 
 class Block(GameSprite):
     image = load_image("blok.jpg")
@@ -339,8 +396,10 @@ class VerticalDoor(GameSprite):
 class Monsters(MovableGameSprite):
     image = load_image("monster.png")
 
-    def __init__(self, *group, x, y, levelMap):
+    def __init__(self, *group, x, y, levelMap, mag, robber):
         super().__init__(Monsters.image, x, y, *group, width= 40, height= 40, level_map=levelMap, hspeed=120)
+        self.mag = mag
+        self.robber = robber
     
     def can_move(self, block_content):
         return block_content in ".@$7X"
@@ -348,9 +407,9 @@ class Monsters(MovableGameSprite):
     def can_stay(self, block_content):
         return block_content in "#-"
 
-    def update(self, *args, mag, robber, levelMap):
-        if pygame.sprite.collide_mask(self, mag):
-            mag.alive = False
+    def do_update(self, *args):
+        if pygame.sprite.collide_mask(self, self.mag):
+            self.mag.alive = False
         self.move(False, True)
 
 
@@ -374,15 +433,15 @@ class Mag(MovableGameSprite):
     def can_stay(self, block_content):
         return not (block_content in [".", "$", "@", "X", "7", "*", "0"])
 
-    def update(self, *args, levelMap):
-        self.fall()
-        self.jump()
+    def do_update(self, *args):
         if args and pygame.key.get_pressed()[pygame.K_d]:
             self.set_direction(True)
             self.move()
         if args and pygame.key.get_pressed()[pygame.K_a]:
             self.set_direction(False)
             self.move()
+        if args and pygame.key.get_pressed()[pygame.K_w]:
+            self.jump()
         return    
 
         # Проверка нижних углов персонажа
