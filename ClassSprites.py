@@ -54,13 +54,13 @@ class GameSprite(pygame.sprite.Sprite):
         self.rect.left = value * commonConsts.BLOCK_SIZE
 
     def set_right_cell_x(self, value):
-        self.rect.right = value * commonConsts.BLOCK_SIZE + commonConsts.BLOCK_SIZE - 1
+        self.rect.right = value * commonConsts.BLOCK_SIZE + commonConsts.BLOCK_SIZE
 
     def set_top_cell_y(self, value):
         self.rect.top = value * commonConsts.BLOCK_SIZE
 
     def set_bottom_cell_y(self, value):
-        self.rect.bottom = value * commonConsts.BLOCK_SIZE + commonConsts.BLOCK_SIZE - 1
+        self.rect.bottom = value * commonConsts.BLOCK_SIZE + commonConsts.BLOCK_SIZE
     
 class  MovableGameSprite(GameSprite):
     def __init__(self, image: pygame.Surface, x: int, y: int, *group, level_map, width=0, height=0, hspeed=0, vspeed=0, right_direction = False, left_direction_image: pygame.Surface = None):
@@ -96,9 +96,26 @@ class  MovableGameSprite(GameSprite):
         return self.can_stay(block_content)
     
     def fall(self):
+        distance = 400 / commonConsts.FPS
+        offset = 0
         if self.can_stay(self.level_map[self.get_bottom_cell_y(1)][self.get_left_cell_x()]) or self.can_stay(self.level_map[self.get_bottom_cell_y(1)][self.get_right_cell_x()]):
             return
-        self.rect.top += 400 / commonConsts.FPS
+
+        full_distance = True
+        blocks = 0
+        while offset<distance:
+            offset+=commonConsts.BLOCK_SIZE
+            if offset>distance:
+                offset = distance
+            if self.can_stay(self.level_map[self.get_bottom_cell_y(offset)][self.get_left_cell_x()]) or self.can_stay(self.level_map[self.get_bottom_cell_y(offset)][self.get_right_cell_x()]):
+                full_distance = False
+                break
+            blocks+=1
+        if full_distance:
+            self.rect.top += distance
+        else:
+            self.set_bottom_cell_y(self.get_bottom_cell_y(1)+blocks)
+
         
 
     def jump(self):
@@ -157,13 +174,13 @@ class  MovableGameSprite(GameSprite):
                         break
                 else:
                     if not self.can_stay(self.level_map[self.get_bottom_cell_y()+1][block_back]):
-                        full_distance = False
-                        if self.right_direction:
-                            self.set_right_cell_x(right)
-                        else:
-                            self.set_left_cell_x(left)
+                        #full_distance = False
+                        #if self.right_direction:
+                        #    self.set_right_cell_x(right)
+                        #else:
+                        #    self.set_left_cell_x(left)
                         self.fall()
-                        break
+                        #break
             last_success_right = right
             last_success_left = left
                 
