@@ -63,7 +63,7 @@ class GameSprite(pygame.sprite.Sprite):
         self.rect.bottom = value * commonConsts.BLOCK_SIZE + commonConsts.BLOCK_SIZE
     
 class  MovableGameSprite(GameSprite):
-    def __init__(self, image: pygame.Surface, x: int, y: int, *group, level_map, width=0, height=0, hspeed=0, vspeed=400, jump_height=3*commonConsts.BLOCK_SIZE, right_direction = False, left_direction_image: pygame.Surface = None):
+    def __init__(self, image: pygame.Surface, x: int, y: int, *group, level_map, width=0, height=0, hspeed=0, vspeed=800, jump_height=3*commonConsts.BLOCK_SIZE, right_direction = False, left_direction_image: pygame.Surface = None):
         super().__init__(image, x, y, *group, width= width, height=height)
         self.hspeed = hspeed
         self.vspeed = vspeed
