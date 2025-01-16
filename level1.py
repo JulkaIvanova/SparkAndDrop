@@ -57,7 +57,7 @@ class Board:
         for i in range(self.height):
             for j in range(self.width):
                 pygame.draw.rect(
-                    screen,
+                    screen
                     (255, 255, 255),
                     pygame.Rect(
                         self.left + j * self.cell_size,

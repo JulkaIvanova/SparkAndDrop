@@ -62,7 +62,7 @@ class MagicDoor(spritesBase.GameSprite):
         # if levelMap[int(mag.ypos//40)][int(mag.xpos//40)-1] == "I" or levelMap[int(mag.ypos//40)][int(mag.xpos//40)+1] == "I":
         if levelMap[int(mag.get_top_cell_y())][int(mag.get_left_cell_x())-1] == "I" or levelMap[int(mag.get_top_cell_y())][int(mag.get_left_cell_x())+1] == "I":
             #print(6)
-            if args and pygame.key.get_pressed()[pygame.K_s]:
+            if args and pygame.key.get_pressed()[pygame.K_e]:
                 # self.open = True
                 #print(8)
                 levelMap[int(self.rect.y//40)] = levelMap[int(self.rect.y//40)][:int(self.rect.x//40)]+"."+levelMap[int(self.rect.y//40)][int(self.rect.x//40)+1:]
