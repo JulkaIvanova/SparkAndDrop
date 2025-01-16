@@ -18,7 +18,7 @@ def load_image(name, colorkey=None):
     return image
 
 def checkList(list):
-    
+
     for i in list:
         if i.activate:
             return True
@@ -35,12 +35,12 @@ class Coin(spritesBase.GameSprite):
 
     def __init__(self, *group, x, y):
         super().__init__(Coin.image, x, y, *group, width= 40)
-    
+
     def update(self, *args, mag, robber, coinsCollect):
         if pygame.sprite.collide_mask(self, mag) or pygame.sprite.collide_mask(self, robber):
             self.kill()
             coinsCollect.cnt += 1
-            
+
 
 class Door(spritesBase.GameSprite):
     image = load_image("door.png")
@@ -56,7 +56,7 @@ class MagicDoor(spritesBase.GameSprite):
     def __init__(self, *group, x, y):
         super().__init__(MagicDoor.image, x, y, *group, width= 40, height= 80)
         # self.open = False
-    
+
     def update(self, *args, mag: spritesBase.GameSprite, levelMap):
         # if pygame.sprite.collide_mask(mag, self):
         # if levelMap[int(mag.ypos//40)][int(mag.xpos//40)-1] == "I" or levelMap[int(mag.ypos//40)][int(mag.xpos//40)+1] == "I":
@@ -75,7 +75,7 @@ class Button(spritesBase.GameSprite):
     def __init__(self, *group, x, y):
         super().__init__(Button.image, x, y, *group, width= 40)
         self.activate = False
-    
+
     def update(self, *args, mag, robber):
         if args and ((pygame.sprite.collide_mask(self, mag) and pygame.key.get_pressed()[pygame.K_q]) or (pygame.sprite.collide_mask(self, robber) and pygame.key.get_pressed()[pygame.K_u])):
             self.activate = True
@@ -104,7 +104,7 @@ class GorizontalDoor(spritesBase.GameSprite):
         super().__init__(GorizontalDoor.image, x, y, *group, width= 80, height= 40)
         self.button = []
         self.imghide = load_image(f"hide.png")
-    
+
     def connect(self, cnt, objectt, typetext, cntbuttons=None):
         self.image = load_image(f"gorizontaldoor{cnt}.png")
         self.image = pygame.transform.scale(self.image, (80, 40))
@@ -118,7 +118,7 @@ class GorizontalDoor(spritesBase.GameSprite):
                 self.button.append(objectt[i])
                 self.button[i].image = load_image(f"{typetext}{cnt}.png")
                 self.button[i].image = pygame.transform.scale(self.button[i].image, (40, 40))
-            
+
     def check(self, levelMap):
         if checkList(self.button):
             # levelMap[int(y//40)] = levelMap[int(y//40)][:int(x//40)]+"."+levelMap[int(y//40)][int(x//40)+1:]
@@ -139,7 +139,7 @@ class VerticalDoor(spritesBase.GameSprite):
         super().__init__(VerticalDoor.image, x, y, *group, width= 40, height= 80)
         self.button = []
         self.imghide = load_image(f"hide.png")
-    
+
     def connect(self, cnt, objectt, typetext, cntbuttons=None):
         self.image = load_image(f"verticaldoor{cnt}.png")
         self.image = pygame.transform.scale(self.image, (40, 80))
@@ -154,7 +154,7 @@ class VerticalDoor(spritesBase.GameSprite):
                 self.button.append(objectt[i])
                 self.button[i].image = load_image(f"{typetext}{cnt}.png")
                 self.button[i].image = pygame.transform.scale(self.button[i].image, (40, 40))
-            
+
     def check(self, levelMap):
         if checkList(self.button):
             levelMap[self.get_top_cell_y()] = levelMap[self.get_top_cell_y()][:self.get_left_cell_x()]+"."+levelMap[self.get_top_cell_y()][self.get_left_cell_x()+1:]
@@ -176,10 +176,10 @@ class Monsters(spritesBase.MovableGameSprite):
         super().__init__(Monsters.image, x, y, *group, width= 40, height= 40, level_map=levelMap, hspeed=120)
         self.mag = mag
         self.robber = robber
-    
+
     def can_move(self, block_content):
         return block_content in ".@$7X"
-    
+
     def can_stay(self, block_content):
         return block_content in "#-"
 
@@ -187,6 +187,11 @@ class Monsters(spritesBase.MovableGameSprite):
         if pygame.sprite.collide_mask(self, self.mag):
             self.mag.alive = False
         self.move(False, True)
+        if args and pygame.sprite.collide_mask(self, self.robber):
+            if pygame.key.get_pressed()[pygame.K_DOWN]:
+                self.kill()
+            else:
+                self.robber.alive = False
 
 
 class Mag(spritesBase.MovableGameSprite):
@@ -198,7 +203,7 @@ class Mag(spritesBase.MovableGameSprite):
 
     def can_move(self, block_content):
         return block_content in [".", "$", "@", "X", "7", "*", "0"]
-    
+
     def can_stay(self, block_content):
         return not (block_content in [".", "$", "@", "X", "7", "*", "0"])
 
@@ -212,16 +217,31 @@ class Mag(spritesBase.MovableGameSprite):
         if args and pygame.key.get_pressed()[pygame.K_w]:
             self.jump()
 
-class Robber(spritesBase.GameSprite):
+class Robber(spritesBase.MovableGameSprite):
     image = load_image("robber.png")
 
-    def __init__(self, *group, x, y):
-        super().__init__(Robber.image, x, y, *group, width= 40, height= 80)
+    def __init__(self, *group, x, y, levelMap):
+        super().__init__(Robber.image, x, y, *group, width= 40, height= 80, level_map=levelMap, hspeed=240)
         self.alive = True
+
+    def can_move(self, block_content):
+        return block_content in [".", "$", "@", "X", "7", "*", "0"]
+
+    def can_stay(self, block_content):
+        return not (block_content in [".", "$", "@", "X", "7", "*", "0"])
+
+    def do_update(self, *args):
+        if args and pygame.key.get_pressed()[pygame.K_RIGHT]:
+            self.set_direction(True)
+            self.move()
+        if args and pygame.key.get_pressed()[pygame.K_LEFT]:
+            self.set_direction(False)
+            self.move()
+        if args and pygame.key.get_pressed()[pygame.K_UP]:
+            self.jump()
 
     # def update(self):
     #     if args and args[0].type == pygame.MOUSEBUTTONDOWN:
     #         self.image = self.image_boom
 
 
- 

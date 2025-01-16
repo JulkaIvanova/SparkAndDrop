@@ -156,7 +156,7 @@ for i in range(len(level)):
         elif level[i][j] == "-":
             gorizontaldoors.append(ClassSprites.GorizontalDoor(all_sprites_gorizontaledoors, x = j*40, y = i*40))
         elif level[i][j] == "@":
-            robber = ClassSprites.Robber(all_sprites_robber, x = j*40, y = i*40)
+            robber = ClassSprites.Robber(all_sprites_robber, x = j*40, y = i*40, levelMap=level)
         elif level[i][j] == "$":
             mag = ClassSprites.Mag(all_sprites_mag, x = j*40, y = i*40, levelMap=level)
         elif level[i][j] == "|":
@@ -244,6 +244,7 @@ if __name__ == "__main__":
         #board.render(screen)
         #if cnt==0:
         all_sprites_mag.update(eventt)
+        all_sprites_robber.update(eventt)
         all_monsterss.update(eventt)
         all_sprites_coins.update(eventt, mag=mag, robber=robber, coinsCollect=coinsCollect)
         all_sprites_magicdoor.update(eventt, mag=mag, levelMap=level)
