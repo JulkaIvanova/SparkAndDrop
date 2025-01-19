@@ -124,7 +124,7 @@ with open("data\level_1.txt") as f:
 #             level[i] = level[i][:j+1]+"-"+level[i][j+2:]
 #             k = j+1
 
-        
+doors = []
 level = level.split("\n")
 coins = 0
 all_sprites_bloks = pygame.sprite.Group()
@@ -148,7 +148,7 @@ for i in range(len(level)):
         elif level[i][j] == "I":
             ClassSprites.MagicDoor(all_sprites_magicdoor, x = j*40, y = i*40)
         elif level[i][j] == "T":
-            ClassSprites.Door(all_sprites_door, x = j*40, y = i*40)
+            doors.append(ClassSprites.Door(all_sprites_door, x = j*40, y = i*40))
         elif level[i][j] == "0":
             buttons.append(ClassSprites.Button(all_sprites_button, x = j*40, y = i*40))
         elif level[i][j] == "*":
@@ -163,7 +163,7 @@ for i in range(len(level)):
             verticaldoors.append(ClassSprites.VerticalDoor(all_sprites_verticaldoors, x = j*40, y = i*40))
         elif level[i][j] == "X":
             ClassSprites.Monsters(all_monsterss, x = j*40, y = i*40, levelMap=level, mag=mag, robber=robber)
-            
+
 d = -1
 k = -1
 t = -1
@@ -213,7 +213,7 @@ if __name__ == "__main__":
     flag = False
     pos = (0, 0)
      
-    pygame.display.set_caption("Свой курсор мыши")
+    pygame.display.set_caption("ФИСК БАГИ!!!!!!!!")
     image = load_image("background_lvl_1.jpg")
     image = pygame.transform.scale(image, (1200, 800))
     
@@ -251,6 +251,7 @@ if __name__ == "__main__":
         all_sprites_verticaldoors.draw(screen)
         all_sprites_lever.update(eventt, mag=mag, robber=robber)
         all_sprites_button.update(eventt, mag=mag, robber=robber)
+        all_sprites_door.update(eventt, mag=mag, robber=robber, levelMap=level)
         #mag.draw(screen)
         # screen.blit(mag.image, (mag.xpos, mag.ypos))
         # mag.falling(level)

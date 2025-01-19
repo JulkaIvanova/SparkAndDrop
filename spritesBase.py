@@ -104,48 +104,195 @@ class  MovableGameSprite(GameSprite):
     def _process_jump(self):
         if not self.jump_in_progress:
             return
-        
+
         if not self.can_jump_through(self.level_map[self.get_top_cell_y(-1)][self.get_left_cell_x()]) or \
-           not self.can_jump_through(self.level_map[self.get_top_cell_y(-1)][self.get_right_cell_x()]) or \
-            self.current_jump_height>=self.jump_height:
+                not self.can_jump_through(self.level_map[self.get_top_cell_y(-1)][self.get_right_cell_x()]) or \
+                self.current_jump_height >= self.jump_height:
             self.jump_in_progress = False
             self.current_jump_height = 0
             return
 
         distance = self.vspeed / commonConsts.FPS
-        if (self.current_jump_height+distance)>self.jump_height:
+        if (self.current_jump_height + distance) > self.jump_height:
             distance = self.jump_height - self.current_jump_height
 
         full_distance = True
         blocks = 0
         offset = 0
-        while offset<distance:
-            offset+=commonConsts.BLOCK_SIZE
-            if offset>distance:
+        while offset < distance:
+            offset += commonConsts.BLOCK_SIZE
+            if offset > distance:
                 offset = distance
             if not self.can_jump_through(self.level_map[self.get_top_cell_y(-offset)][self.get_left_cell_x()]) or \
-               not self.can_jump_through(self.level_map[self.get_top_cell_y(-offset)][self.get_right_cell_x()]):
+                    not self.can_jump_through(self.level_map[self.get_top_cell_y(-offset)][self.get_right_cell_x()]):
                 full_distance = False
                 break
-            blocks+=1
+            blocks += 1
         if full_distance:
             self.rect.top -= distance
-            self.current_jump_height +=distance
-            if self.current_jump_height>=self.jump_height:
+            self.current_jump_height += distance
+            if self.current_jump_height >= self.jump_height:
                 self.jump_in_progress = False
                 self.current_jump_height = 0
         else:
-            self.set_top_cell_y(self.get_top_cell_y()-blocks)
+            self.set_top_cell_y(self.get_top_cell_y() - blocks)
             self.jump_in_progress = False
             self.current_jump_height = 0
-        
+
+    # def _process_jump(self):
+    #     if not self.jump_in_progress:
+    #         return
+    #
+    #     if not self.can_jump_through(self.level_map[self.get_top_cell_y(-1)][self.get_left_cell_x()]) or \
+    #        not self.can_jump_through(self.level_map[self.get_top_cell_y(-1)][self.get_right_cell_x()]) or \
+    #         self.current_jump_height>=self.jump_height:
+    #         self.jump_in_progress = False
+    #         self.current_jump_height = 0
+    #         return
+    #
+    #     distance = self.vspeed / commonConsts.FPS
+    #     if (self.current_jump_height+distance)>self.jump_height:
+    #         distance = self.jump_height - self.current_jump_height
+    #
+    #     full_distance = True
+    #     blocks = 0
+    #     offset = 0
+    #     while offset<distance:
+    #         offset+=commonConsts.BLOCK_SIZE
+    #         if offset>distance:
+    #             offset = distance
+    #         if not self.can_jump_through(self.level_map[self.get_top_cell_y(-offset)][self.get_left_cell_x()]) or \
+    #            not self.can_jump_through(self.level_map[self.get_top_cell_y(-offset)][self.get_right_cell_x()]):
+    #             full_distance = False
+    #             break
+    #         blocks+=1
+    #     if full_distance:
+    #         self.rect.top -= distance
+    #         self.current_jump_height +=distance
+    #         if self.current_jump_height>=self.jump_height:
+    #             self.jump_in_progress = False
+    #             self.current_jump_height = 0
+    #     else:
+    #         self.set_top_cell_y(self.get_top_cell_y()-blocks)
+    #         self.jump_in_progress = False
+    #         self.current_jump_height = 0
+
+    # def _process_jump(self):
+    #     if not self.jump_in_progress:
+    #         return
+    #
+    #     # Рассчитываем расстояние, которое нужно преодолеть за кадр
+    #     distance = self.vspeed / commonConsts.FPS
+    #     if self.current_jump_height + distance > self.jump_height:
+    #         distance = self.jump_height - self.current_jump_height
+    #
+    #     # Проверяем, можно ли пройти все расстояние
+    #     full_distance = True
+    #     offset = 0
+    #     while offset < distance:
+    #         offset += commonConsts.BLOCK_SIZE
+    #         if offset > distance:
+    #             offset = distance
+    #
+    #         # Проверяем, можно ли подняться выше
+    #         if not self.can_jump_through(self.level_map[self.get_top_cell_y(-offset)][self.get_left_cell_x()]) or \
+    #            not self.can_jump_through(self.level_map[self.get_top_cell_y(-offset)][self.get_right_cell_x()]):
+    #             full_distance = False
+    #             break
+    #
+    #     # Если можем пройти всё расстояние, поднимаемся
+    #     if full_distance:
+    #         self.rect.top -= distance
+    #         self.current_jump_height += distance
+    #
+    #     # Если достигнута максимальная высота или столкновение, завершаем прыжок
+    #     if self.current_jump_height >= self.jump_height or not full_distance:
+    #         self.jump_in_progress = False
+    #         self.current_jump_height = 0
+    # def _process_jump(self):
+    #     if not self.jump_in_progress:
+    #         return
+    #
+    #     # Используем баллистическое движение для расчета подъема
+    #     gravity = self.vspeed / (2 * self.jump_height)  # Определяем силу гравитации для баллистической траектории
+    #     velocity = (2 * self.jump_height * gravity) ** 0.5  # Начальная скорость прыжка
+    #
+    #     # Рассчитываем расстояние, которое нужно преодолеть за кадр
+    #     time_step = 1 / commonConsts.FPS
+    #     distance = velocity * time_step - 0.5 * gravity * (time_step ** 2)
+    #     velocity -= gravity * time_step
+    #
+    #     # Проверяем, можно ли пройти все расстояние
+    #     full_distance = True
+    #     offset = 0
+    #     while offset < distance:
+    #         offset += commonConsts.BLOCK_SIZE
+    #         if offset > distance:
+    #             offset = distance
+    #
+    #         # Проверяем, можно ли подняться выше
+    #         if not self.can_jump_through(self.level_map[self.get_top_cell_y(-offset)][self.get_left_cell_x()]) or \
+    #            not self.can_jump_through(self.level_map[self.get_top_cell_y(-offset)][self.get_right_cell_x()]):
+    #             full_distance = False
+    #             break
+    #
+    #     # Если можем пройти всё расстояние, поднимаемся
+    #     if full_distance:
+    #         self.rect.top -= distance
+    #         self.current_jump_height += distance
+    #
+    #     # Если достигнута максимальная высота или столкновение, завершаем прыжок
+    #     if self.current_jump_height >= self.jump_height or not full_distance:
+    #         self.jump_in_progress = False
+    #         self.current_jump_height = 0
+    # def _process_jump(self):
+    #     if not self.jump_in_progress:
+    #         return
+    #
+    #     # Если это первый кадр прыжка, инициализируем начальную скорость
+    #     if not hasattr(self, 'jump_velocity') or self.jump_velocity is None:
+    #         gravity = self.vspeed / (2 * self.jump_height)  # Определяем силу гравитации для баллистической траектории
+    #         self.jump_velocity = (2 * self.jump_height * gravity) ** 0.5  # Начальная скорость прыжка
+    #         self.gravity = gravity  # Сохраняем значение гравитации
+    #
+    #     # Рассчитываем расстояние, которое нужно преодолеть за кадр
+    #     time_step = 1 / commonConsts.FPS
+    #     distance = self.jump_velocity * time_step - 0.5 * self.gravity * (time_step ** 2)
+    #     self.jump_velocity -= self.gravity * time_step
+    #
+    #     # Проверяем, можно ли пройти все расстояние
+    #     full_distance = True
+    #     offset = 0
+    #     while offset < distance:
+    #         offset += commonConsts.BLOCK_SIZE
+    #         if offset > distance:
+    #             offset = distance
+    #
+    #         # Проверяем, можно ли подняться выше
+    #         if not self.can_jump_through(self.level_map[self.get_top_cell_y(-offset)][self.get_left_cell_x()]) or \
+    #            not self.can_jump_through(self.level_map[self.get_top_cell_y(-offset)][self.get_right_cell_x()]):
+    #             full_distance = False
+    #             break
+    #
+    #     # Если можем пройти всё расстояние, поднимаемся
+    #     if full_distance:
+    #         self.rect.top -= distance
+    #         self.current_jump_height += distance
+    #
+    #     # Если достигнута максимальная высота, столкновение или скорость упала до 0, завершаем прыжок
+    #     if self.current_jump_height >= self.jump_height or not full_distance or self.jump_velocity <= 0:
+    #         self.jump_in_progress = False
+    #         self.current_jump_height = 0
+    #         self.jump_velocity = None
+    #
+    #
     def do_update(self):
         pass
 
     def jump(self):
         if self.jump_in_progress:
             return
-        
+
         if not self.can_stay(self.level_map[self.get_bottom_cell_y(1)][self.get_left_cell_x()]) and not self.can_stay(self.level_map[self.get_bottom_cell_y(1)][self.get_right_cell_x()]):
             return
 
@@ -156,8 +303,8 @@ class  MovableGameSprite(GameSprite):
         if distance == 0:
             distance = self.hspeed // commonConsts.FPS  # При таком подходе скорость спрайта должна быть кратна fps, иначе она будет урезаться
         if distance == 0:
-            return    
-        
+            return
+
         #Пока предполагаем, что максимальная высота спрайта два блока
         full_distance = True
         offset=0
@@ -167,7 +314,7 @@ class  MovableGameSprite(GameSprite):
             offset+=commonConsts.BLOCK_SIZE
             if offset>distance:
                 offset = distance
-            if self.right_direction:    
+            if self.right_direction:
                 right = self.get_right_cell_x(offset)
                 left = self.get_left_cell_x(offset)
             else:
@@ -176,10 +323,10 @@ class  MovableGameSprite(GameSprite):
             # Если блок в котором находится спрайт не изменится, то проверки не нужны
             if right == self.get_right_cell_x() and left == self.get_left_cell_x():
                 continue
-            
+
             if self.right_direction:
                 block_front = right
-                block_back = left    
+                block_back = left
             else:
                 block_back = right
                 block_front = left
@@ -214,7 +361,7 @@ class  MovableGameSprite(GameSprite):
                         #break
             last_success_right = right
             last_success_left = left
-                
+
         if full_distance:
             if self.right_direction:
                 self.rect.left = self.rect.left + distance
@@ -225,4 +372,18 @@ class  MovableGameSprite(GameSprite):
     def update(self, *args):
         self.fall()
         self._process_jump()
-        self.do_update(*args)   
+        self.do_update(*args)
+
+    # def is_majority_inside(self, door):
+    #     """
+    #     Проверяет, находится ли большая часть спрайта внутри двери.
+    #
+    #     :param door: Спрайт двери.
+    #     :return: True, если большая часть спрайта внутри двери, иначе False.
+    #     """
+    #     intersection = self.rect.clip(door.rect)
+    #
+    #     sprite_area = self.rect.width * self.rect.height
+    #     intersection_area = intersection.width * intersection.height
+    #
+    #     return intersection_area > 0.5 * sprite_area
