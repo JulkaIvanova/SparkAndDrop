@@ -121,14 +121,29 @@ class Lever(spritesBase.GameSprite):
         super().__init__(Lever.image, x, y, *group, width=40)
         self.activate = False
 
-    def update(self, *args, mag, robber):
+    def update(self, *args, mag: spritesBase.GameSprite, robber: spritesBase.GameSprite):
         if not (args[0] is None):
-            if ((pygame.sprite.collide_mask(self, mag) and pygame.KEYDOWN and args[0].key == pygame.K_q) or (
-                    pygame.sprite.collide_mask(self, robber) and pygame.KEYDOWN and args[0].key == pygame.K_u)):
+            if ((self.check_sprite_inside(mag)  and pygame.KEYDOWN and args[0].key == pygame.K_q) or (
+                    self.check_sprite_inside(robber) and pygame.KEYDOWN and args[0].key == pygame.K_u)):
                 if self.activate:
                     self.activate = False
                 else:
                     self.activate = True
+
+
+    def check_sprite_inside(self, sprite):
+        """
+        Проверяет, находится ли спрайт большей частью внутри двери.
+
+        :param sprite: Игровой спрайт (маг или вор).
+        :return: True, если большая часть спрайта внутри двери, иначе False.
+        """
+        intersection = self.rect.clip(sprite.rect)
+
+        sprite_area = sprite.rect.width * sprite.rect.height
+        intersection_area = intersection.width * intersection.height
+
+        return intersection_area > 0.25 * sprite_area
 
 
 class GorizontalDoor(spritesBase.GameSprite):
