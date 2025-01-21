@@ -206,7 +206,11 @@ for i in range(len(gorizontaldoors)):
     else:
         cnt = f'{i}'
     gorizontaldoors[i].connect(cnt, levers[i], "lever")
+#
 verticaldoors[0].connect('', buttons, "button", 2)
+#
+
+
 #levelmap = mutableLevelMap(level)
 if __name__ == "__main__":
     running = True
@@ -248,17 +252,21 @@ if __name__ == "__main__":
         all_monsterss.update(eventt)
         all_sprites_coins.update(eventt, mag=mag, robber=robber, coinsCollect=coinsCollect)
         all_sprites_magicdoor.update(eventt, mag=mag, levelMap=level)
+        #
         all_sprites_verticaldoors.draw(screen)
         all_sprites_lever.update(eventt, mag=mag, robber=robber)
         all_sprites_button.update(eventt, mag=mag, robber=robber)
+        #
         all_sprites_door.update(eventt, mag=mag, robber=robber, levelMap=level)
         #mag.draw(screen)
         # screen.blit(mag.image, (mag.xpos, mag.ypos))
         # mag.falling(level)
         # all_sprites_mag[0].falling(level)
+#
         for i in gorizontaldoors:
             i.check(level)
         verticaldoors[0].check(level)
+        #
         printtext(str(mag.get_left_cell_x())+" "+str(mag.get_right_cell_x())+" "+str(mag.get_top_cell_y())+" "+str(mag.get_bottom_cell_y()))
         clock.tick(commonConsts.FPS)
         pygame.display.flip()

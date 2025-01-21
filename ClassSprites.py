@@ -123,13 +123,12 @@ class Lever(spritesBase.GameSprite):
 
     def update(self, *args, mag: spritesBase.GameSprite, robber: spritesBase.GameSprite):
         if not (args[0] is None):
-            if ((self.check_sprite_inside(mag)  and pygame.KEYDOWN and args[0].key == pygame.K_q) or (
+            if ((self.check_sprite_inside(mag) and pygame.KEYDOWN and args[0].key == pygame.K_q) or (
                     self.check_sprite_inside(robber) and pygame.KEYDOWN and args[0].key == pygame.K_u)):
                 if self.activate:
                     self.activate = False
                 else:
                     self.activate = True
-
 
     def check_sprite_inside(self, sprite):
         """
@@ -182,6 +181,25 @@ class GorizontalDoor(spritesBase.GameSprite):
             self.image = self.image_original
             # for i in self.button:
             #     print(i.activate)
+
+
+class Box(spritesBase.GameSprite):
+    image = load_image("Box.png")
+
+    def __init__(self, *group, x, y, robber, levelMap):
+        super().__init__(Box.image, x, y, *group, width=40)
+        self.robber = robber
+        self.levelMap = levelMap
+
+
+class Spike(spritesBase.GameSprite):
+    image = load_image("spike.png")
+
+    def __init__(self, *group, x, y, robber, mag, levelMap):
+        super().__init__(Box.image, x, y, *group, width=40)
+        self.robber = robber
+        self.levelMap = levelMap
+        self.mag = mag
 
 
 class VerticalDoor(spritesBase.GameSprite):
