@@ -259,17 +259,17 @@ def load_image(name, colorkey=None):
     image = pygame.image.load(fullname)
     return image
 
-with open("data\level_2.txt") as f:
-    level = f.read()  
-if __name__ == "__main__":    
-    LevelTwo(levelMap=level.split("\n"), background=load_image("background_lvl_2.jpg")).paint()
+# with open("data\level_2.txt") as f:
+#     level = f.read()  
+# if __name__ == "__main__":    
+#     LevelTwo(levelMap=level.split("\n"), background=load_image("background_lvl_2.jpg")).paint()
 
 # with open("data\level_1.txt") as f:
 #     level = f.read()  
 # if __name__ == "__main__":    
 #     LevelOne(levelMap=level.split("\n"), background=load_image("background_lvl_1.jpg")).paint()
 
-# with open("data\level_3.txt") as f:
-#     level = f.read()  
-# if __name__ == "__main__":    
-#     LevelThree(levelMap=level.split("\n"), background=load_image("background_lvl_3.jpg")).paint()
+with open("data\level_3.txt") as f:
+    level = f.read()  
+if __name__ == "__main__":    
+    LevelThree(levelMap=level.split("\n"), background=load_image("background_lvl_3.jpg")).paint()

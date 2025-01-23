@@ -305,6 +305,7 @@ class Robber(spritesBase.MovableGameSprite):
     def __init__(self, *group, x, y, levelMap):
         super().__init__(Robber.image, x, y, *group, width=40, height=80, level_map=levelMap, hspeed=240)
         self.alive = True
+        self.box = None
 
     def can_move(self, block_content):
         return block_content in [".", "$", "@", "X", "7", "*", "0", "T", "S", "B"]
