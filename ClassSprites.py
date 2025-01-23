@@ -193,13 +193,19 @@ class Box(spritesBase.GameSprite):
 
 
 class Spike(spritesBase.GameSprite):
-    image = load_image("spike.png")
+    image = load_image("spike.png", 1)
 
     def __init__(self, *group, x, y, robber, mag, levelMap):
-        super().__init__(Box.image, x, y, *group, width=40)
+        super().__init__(Spike.image, x, y, *group, width=40)
         self.robber = robber
         self.levelMap = levelMap
         self.mag = mag
+    
+    def update(self, *args):
+        if pygame.sprite.collide_mask(self, self.mag):
+            self.mag.alive = False
+        if pygame.sprite.collide_mask(self, self.robber):
+            self.robber.alive = False
 
 
 class VerticalDoor(spritesBase.GameSprite):
@@ -263,8 +269,8 @@ class Monsters(spritesBase.MovableGameSprite):
         if pygame.sprite.collide_mask(self, self.mag):
             self.mag.alive = False
         self.move(False, True)
-        if args and pygame.sprite.collide_mask(self, self.robber):
-            if pygame.key.get_pressed()[pygame.K_DOWN]:
+        if pygame.sprite.collide_mask(self, self.robber):
+            if args and pygame.key.get_pressed()[pygame.K_DOWN]:
                 self.kill()
             else:
                 self.robber.alive = False
@@ -278,10 +284,10 @@ class Mag(spritesBase.MovableGameSprite):
         self.alive = True
 
     def can_move(self, block_content):
-        return block_content in [".", "$", "@", "X", "7", "*", "0", "T"]
+        return block_content in [".", "$", "@", "X", "7", "*", "0", "T", "S"]
 
     def can_stay(self, block_content):
-        return not (block_content in [".", "$", "@", "X", "7", "*", "0", "T"])
+        return not (block_content in [".", "$", "@", "X", "7", "*", "0", "T", "S"])
 
     def do_update(self, *args):
         if args and pygame.key.get_pressed()[pygame.K_d]:
@@ -302,10 +308,10 @@ class Robber(spritesBase.MovableGameSprite):
         self.alive = True
 
     def can_move(self, block_content):
-        return block_content in [".", "$", "@", "X", "7", "*", "0", "T"]
+        return block_content in [".", "$", "@", "X", "7", "*", "0", "T", "S"]
 
     def can_stay(self, block_content):
-        return not (block_content in [".", "$", "@", "X", "7", "*", "0", "T"])
+        return not (block_content in [".", "$", "@", "X", "7", "*", "0", "T", "S"])
 
     def do_update(self, *args):
         if args and pygame.key.get_pressed()[pygame.K_RIGHT]:

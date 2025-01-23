@@ -80,7 +80,7 @@ if __name__ == "__main__":
         image = load_image("r2.png")
         image = pygame.transform.scale(image, (1200, 800))
         screen.blit(image, pos)
-        board.render(screen)
+        # board.render(screen)
 
         pygame.display.flip()
 

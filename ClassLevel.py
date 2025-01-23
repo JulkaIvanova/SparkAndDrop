@@ -211,20 +211,55 @@ class LevelTwo(Level):
             pygame.display.flip()
 
 
-def load_image(name, colorkey=None):
-    fullname = os.path.join("data", name)
-    if not os.path.isfile(fullname):
-        print(f"Файл с изображением '{fullname}' не найден")
-        sys.exit()
-    image = pygame.image.load(fullname)
-    return image
+class LevelThree(Level):
+    def __init__(self, levelMap, background):
+        super().__init__(levelMap, background)
+    
+    def paint(self):
+        self.init()
+        pygame.display.set_caption("Уровень 3")
+        while self.running:
+            eventt = None
+            self.screen.fill((0, 0, 0))
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    self.running = False
+                if event.type == pygame.MOUSEBUTTONDOWN or event.type == pygame.KEYDOWN:
+                    eventt = event
+            if not(self.mag.alive) or not(self.robber.alive):
+                self.running = False
+            self.bild(self.screen)
+            self.all_sprites_mag.update(eventt)
+            self.all_sprites_robber.update(eventt)
+            self.all_monsterss.update(eventt)
+            self.all_sprites_coins.update(eventt, mag=self.mag, robber=self.robber, coinsCollect=self.coinsCollect)
+            self.all_sprites_magicdoor.update(eventt, mag=self.mag, levelMap=self.levelMap)
+            self.all_sprites_lever.update(eventt, mag=self.mag, robber=self.robber)
+            self.all_sprites_button.update(eventt, mag=self.mag, robber=self.robber)
+            self.all_sprites_door.update(eventt, mag=self.mag, robber=self.robber, levelMap=self.levelMap)
+            self.all_sprites_spikes.update(eventt)
+            self.clock.tick(commonConsts.FPS)
+            pygame.display.flip()
+
+# def load_image(name, colorkey=None):
+#     fullname = os.path.join("data", name)
+#     if not os.path.isfile(fullname):
+#         print(f"Файл с изображением '{fullname}' не найден")
+#         sys.exit()
+#     image = pygame.image.load(fullname)
+#     return image
 
 # with open("data\level2.txt") as f:
 #     level = f.read()  
 # if __name__ == "__main__":    
 #     LevelTwo(levelMap=level.split("\n"), background=load_image("background_lvl_2.jpg")).paint()
 
-with open("data\level_1.txt") as f:
-    level = f.read()  
-if __name__ == "__main__":    
-    LevelOne(levelMap=level.split("\n"), background=load_image("background_lvl_1.jpg")).paint()
+# with open("data\level_1.txt") as f:
+#     level = f.read()  
+# if __name__ == "__main__":    
+#     LevelOne(levelMap=level.split("\n"), background=load_image("background_lvl_1.jpg")).paint()
+
+# with open("data\level_3.txt") as f:
+#     level = f.read()  
+# if __name__ == "__main__":    
+#     LevelThree(levelMap=level.split("\n"), background=load_image("background_lvl_3.jpg")).paint()
