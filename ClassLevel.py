@@ -13,7 +13,7 @@ class mutableInt:
         self.cnt = 0
 
 class Level:
-    
+
     def __init__(self, levelMap:list, background:pygame):
         self.levelMap = levelMap
         self.background = pygame.transform.scale(background, (1200, 800))
@@ -39,6 +39,7 @@ class Level:
         self.verticaldoors = []
         self.clock = pygame.time.Clock()
         self.running = True
+        self.boxs = []
 
     def init(self):
         self.initialization()
@@ -76,10 +77,10 @@ class Level:
                 elif self.levelMap[i][j] == "X":
                     ClassSprites.Monsters(self.all_monsterss, x = j*40, y = i*40, levelMap=self.levelMap, mag=self.mag, robber=self.robber)
                 elif self.levelMap[i][j] == "B":
-                    ClassSprites.Box(self.all_sprites_box, x = j*40, y = i*40, levelMap=self.levelMap, robber=self.robber)
+                    self.boxs.append(ClassSprites.Box(self.all_sprites_box, x = j*40, y = i*40, levelMap=self.levelMap, robber=self.robber, mag=self.mag))
                 elif self.levelMap[i][j] == "S":
                     ClassSprites.Spike(self.all_sprites_spikes, x = j*40, y = i*40, levelMap=self.levelMap, robber=self.robber, mag=self.mag)
-    
+
     def correct_levelMap(self):
         d = -1
         k = -1
@@ -111,7 +112,7 @@ class Level:
                 if self.levelMap[i][j] == "-":
                     self.levelMap[i] = self.levelMap[i][:j+1]+"-"+self.levelMap[i][j+2:]
                     k = j+1
-    
+
 
     def bild(self, screen:pygame.display):
         screen.blit(self.background, (0, 0))
@@ -134,7 +135,7 @@ class Level:
 class LevelOne(Level):
     def __init__(self, levelMap, background):
         super().__init__(levelMap, background)
-    
+
     def paint(self):
         self.init()
         for i in range(len(self.gorizontaldoors)):
@@ -174,7 +175,7 @@ class LevelOne(Level):
 class LevelTwo(Level):
     def __init__(self, levelMap, background):
         super().__init__(levelMap, background)
-    
+
     def paint(self):
         self.init()
         pygame.display.set_caption("Уровень 2")
@@ -196,13 +197,14 @@ class LevelTwo(Level):
                 self.running = False
             self.bild(self.screen)
             self.all_sprites_mag.update(eventt)
-            self.all_sprites_robber.update(eventt)
+            self.all_sprites_robber.update(eventt, boxs=self.boxs)
             self.all_monsterss.update(eventt)
             self.all_sprites_coins.update(eventt, mag=self.mag, robber=self.robber, coinsCollect=self.coinsCollect)
             self.all_sprites_magicdoor.update(eventt, mag=self.mag, levelMap=self.levelMap)
             self.all_sprites_lever.update(eventt, mag=self.mag, robber=self.robber)
             self.all_sprites_button.update(eventt, mag=self.mag, robber=self.robber)
             self.all_sprites_door.update(eventt, mag=self.mag, robber=self.robber, levelMap=self.levelMap)
+            self.all_sprites_box.update(eventt)
             for i in self.gorizontaldoors:
                 i.check(self.levelMap)
             for i in self.verticaldoors:
@@ -214,7 +216,7 @@ class LevelTwo(Level):
 class LevelThree(Level):
     def __init__(self, levelMap, background):
         super().__init__(levelMap, background)
-    
+
     def paint(self):
         self.init()
         pygame.display.set_caption("Уровень 3")

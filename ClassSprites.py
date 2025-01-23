@@ -122,13 +122,12 @@ class Lever(spritesBase.GameSprite):
         self.activate = False
 
     def update(self, *args, mag: spritesBase.GameSprite, robber: spritesBase.GameSprite):
-        if not (args[0] is None):
-            if ((self.check_sprite_inside(mag) and pygame.KEYDOWN and args[0].key == pygame.K_q) or (
-                    self.check_sprite_inside(robber) and pygame.KEYDOWN and args[0].key == pygame.K_u)):
-                if self.activate:
-                    self.activate = False
-                else:
-                    self.activate = True
+        # print(args[0])
+        event = args[0]  # Считаем, что передается событие
+        if event is not None and event.type == pygame.KEYDOWN:  # Проверяем, что это событие нажатия клавиши
+            if ((self.check_sprite_inside(mag) and event.key == pygame.K_q) or
+                    (self.check_sprite_inside(robber) and event.key == pygame.K_u)):
+                self.activate = not self.activate
 
     def check_sprite_inside(self, sprite):
         """
@@ -183,13 +182,40 @@ class GorizontalDoor(spritesBase.GameSprite):
             #     print(i.activate)
 
 
-class Box(spritesBase.GameSprite):
+class Box(spritesBase.MovableGameSprite):
     image = load_image("Box.png")
 
-    def __init__(self, *group, x, y, robber, levelMap):
-        super().__init__(Box.image, x, y, *group, width=40)
+    def __init__(self, *group, robber, mag, x, y, levelMap):
+        super().__init__(Box.image, x, y, *group, width=40, height=40, level_map=levelMap, hspeed=240)
         self.robber = robber
+        self.mag = mag
         self.levelMap = levelMap
+
+    def check_collision_with_robber(self):
+        """Проверяет, упирается ли robber в Box."""
+        return (
+                self.robber.rect.colliderect(self.rect)
+                and ((self.robber.rect.right == self.rect.left and pygame.key.get_pressed()[pygame.K_RIGHT]) or
+                     (self.robber.rect.left == self.rect.right and pygame.key.get_pressed()[pygame.K_LEFT]) or
+                     (self.robber.rect.top == self.rect.bottom and pygame.key.get_pressed()[pygame.K_LEFT]) or
+                     (self.robber.rect.left == self.rect.right and pygame.key.get_pressed()[pygame.K_LEFT]))
+        )
+    def can_move(self, block_content):
+        return block_content in ".@$7XB"
+
+    def can_stay(self, block_content):
+        return block_content in "#-"
+
+    def do_update(self, *args):
+        # if pygame.sprite.collide_mask(self, self.robber):
+        #     self.robber.alive = False
+        self.move(False, True)
+        if pygame.sprite.collide_mask(self, self.robber):
+            if args and pygame.key.get_pressed()[pygame.K_DOWN]:
+                self.kill()
+            # else:
+            #     self.robber.alive = False
+
 
 
 class Spike(spritesBase.GameSprite):
@@ -260,7 +286,7 @@ class Monsters(spritesBase.MovableGameSprite):
         self.robber = robber
 
     def can_move(self, block_content):
-        return block_content in ".@$7X"
+        return block_content in ".@$7XB"
 
     def can_stay(self, block_content):
         return block_content in "#-"
@@ -284,7 +310,7 @@ class Mag(spritesBase.MovableGameSprite):
         self.alive = True
 
     def can_move(self, block_content):
-        return block_content in [".", "$", "@", "X", "7", "*", "0", "T", "S"]
+        return block_content in [".", "$", "@", "X", "7", "*", "0", "T", "S", "B "]
 
     def can_stay(self, block_content):
         return not (block_content in [".", "$", "@", "X", "7", "*", "0", "T", "S"])
@@ -308,13 +334,21 @@ class Robber(spritesBase.MovableGameSprite):
         self.alive = True
 
     def can_move(self, block_content):
-        return block_content in [".", "$", "@", "X", "7", "*", "0", "T", "S"]
+        return block_content in [".", "$", "@", "X", "7", "*", "0", "T", "S", "B"]
 
     def can_stay(self, block_content):
         return not (block_content in [".", "$", "@", "X", "7", "*", "0", "T", "S"])
 
-    def do_update(self, *args):
-        if args and pygame.key.get_pressed()[pygame.K_RIGHT]:
+    def do_update(self, *args, boxs=None):
+        box = None
+        if boxs:
+            if args and pygame.key.get_pressed()[pygame.K_RIGHT]:
+                for b in boxs:
+                    if self.rect.right == b.rect.left:
+                        box = b
+                        print(1)
+                if box:
+                    return
             self.set_direction(True)
             self.move()
         if args and pygame.key.get_pressed()[pygame.K_LEFT]:

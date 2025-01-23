@@ -15,7 +15,7 @@ class GameSprite(pygame.sprite.Sprite):
         self.rect = self.image.get_rect()
         self.rect.x = x
         self.rect.y = y
-    
+
     def get_left_cell_x(self, offset = 0):
         return int((self.rect.left + offset) // commonConsts.BLOCK_SIZE)
 
@@ -27,7 +27,7 @@ class GameSprite(pygame.sprite.Sprite):
 
     def get_bottom_cell_y(self, offset = 0):
         return int((self.rect.bottom - 1 + offset) // commonConsts.BLOCK_SIZE)
-    
+
     # Следующие 4 функции принимают на вход иддекс блока и выравнивают по нему левый, правый, верхний или нижний край спрайта
     def set_left_cell_x(self, value):
         self.rect.left = value * commonConsts.BLOCK_SIZE
@@ -40,9 +40,9 @@ class GameSprite(pygame.sprite.Sprite):
 
     def set_bottom_cell_y(self, value):
         self.rect.bottom = value * commonConsts.BLOCK_SIZE + commonConsts.BLOCK_SIZE
-    
+
 class  MovableGameSprite(GameSprite):
-    def __init__(self, image: pygame.Surface, x: int, y: int, *group, level_map, width=0, height=0, hspeed=0, vspeed=800, jump_height=3*commonConsts.BLOCK_SIZE, right_direction = False, left_direction_image: pygame.Surface = None):
+    def __init__(self, image: pygame.Surface, x: int, y: int, *group, level_map, width=0, height=0, hspeed=0, vspeed=600, jump_height=3*commonConsts.BLOCK_SIZE, right_direction = False, left_direction_image: pygame.Surface = None):
         super().__init__(image, x, y, *group, width= width, height=height)
         self.hspeed = hspeed
         self.vspeed = vspeed
@@ -56,10 +56,14 @@ class  MovableGameSprite(GameSprite):
             self.left_image = pygame.transform.flip(self.image, True, False)
 
         self.set_direction(right_direction)
+        self.v_0 = 0
+        self.t = 1 / commonConsts.FPS
+        self.distance = (self.vspeed / commonConsts.FPS)
+        # self.distance = 0
 
     def change_direction(self):
         self.set_direction(not self.right_direction)
-        
+
 
     def set_direction(self, right: bool):
         self.right_direction = right
@@ -67,37 +71,40 @@ class  MovableGameSprite(GameSprite):
             self.image = self.right_image
         else:
             self.image = self.left_image
-    
+
     def can_move(self, block_content):
         return True
-    
+
     def can_stay(self, block_content):
         return True
-    
+
     def can_jump_through(self, block_content):
         return not self.can_stay(block_content)
-    
+
     def fall(self):
         if self.jump_in_progress:
             return
-        
-        distance = self.vspeed / commonConsts.FPS
+
+        self.distance = (self.vspeed / commonConsts.FPS)
+        # self.distance += self.v_0 * self.t + (5 * self.t**2)/2
+        # self.v_0 += 5 * self.t
         offset = 0
         if self.can_stay(self.level_map[self.get_bottom_cell_y(1)][self.get_left_cell_x()]) or self.can_stay(self.level_map[self.get_bottom_cell_y(1)][self.get_right_cell_x()]):
             return
 
         full_distance = True
         blocks = 0
-        while offset<distance:
+        while offset<self.distance:
+
             offset+=commonConsts.BLOCK_SIZE
-            if offset>distance:
-                offset = distance
+            if offset>self.distance:
+                offset = self.distance
             if self.can_stay(self.level_map[self.get_bottom_cell_y(offset)][self.get_left_cell_x()]) or self.can_stay(self.level_map[self.get_bottom_cell_y(offset)][self.get_right_cell_x()]):
                 full_distance = False
                 break
             blocks+=1
         if full_distance:
-            self.rect.top += distance
+            self.rect.top += self.distance
         else:
             self.set_bottom_cell_y(self.get_bottom_cell_y(1)+blocks)
 
@@ -368,7 +375,7 @@ class  MovableGameSprite(GameSprite):
             else:
                 self.rect.left = self.rect.left - distance
 
-    
+
     def update(self, *args):
         self.fall()
         self._process_jump()
