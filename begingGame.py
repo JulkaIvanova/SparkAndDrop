@@ -2,53 +2,11 @@ import pygame
 import os
 import sys
 import levels
-class Board:
-    # создание поля
-    def __init__(self, width, height):
-        self.width = width
-        self.height = height
-        self.board = [[0] * width for _ in range(height)]
-        # значения по умолчанию
-        self.left = 10
-        self.top = 10
-        self.cell_size = 30
-
-    # настройка внешнего вида
-    def set_view(self, left, top, cell_size):
-        self.left = left
-        self.top = top
-        self.cell_size = cell_size
-
-    def render(self, screen):
-        for i in range(self.height):
-            for j in range(self.width):
-                pygame.draw.rect(
-                    screen,
-                    (255, 255, 255),
-                    pygame.Rect(
-                        self.left + j * self.cell_size,
-                        self.top + i * self.cell_size,
-                        self.cell_size,
-                        self.cell_size,
-                    ),
-                    1,
-                )
-
-    def coordinates(self, pos):
-        x = (pos[0] - self.left) // self.cell_size
-        y = (pos[1] - self.top) // self.cell_size
-        if x >= self.width or y >= self.height or x < 0 or y < 0:
-            return
-        return (x, y)
-
-
 
 
 
 class BegingGame:
     def __init__(self):
-        self.board = Board(600, 600)
-        self.board.set_view(0, 0, 40)
         pygame.init()
         self.size = self.width, self.height = 1200, 800
         self.screen = pygame.display.set_mode(self.size)
