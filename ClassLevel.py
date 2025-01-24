@@ -40,6 +40,7 @@ class Level:
         self.clock = pygame.time.Clock()
         self.running = True
         self.boxs = []
+        self.monsterss = []
 
     def init(self):
         self.initialization()
@@ -75,7 +76,7 @@ class Level:
                 elif self.levelMap[i][j] == "|":
                     self.verticaldoors.append(ClassSprites.VerticalDoor(self.all_sprites_verticaldoors, x = j*40, y = i*40))
                 elif self.levelMap[i][j] == "X":
-                    ClassSprites.Monsters(self.all_monsterss, x = j*40, y = i*40, levelMap=self.levelMap, mag=self.mag, robber=self.robber)
+                    self.monsterss.append(ClassSprites.Monsters(self.all_monsterss, x = j*40, y = i*40, levelMap=self.levelMap, mag=self.mag, robber=self.robber))
                 elif self.levelMap[i][j] == "B":
                     self.boxs.append(ClassSprites.Box(self.all_sprites_box, x = j*40, y = i*40, levelMap=self.levelMap, robber=self.robber, mag=self.mag))
                 elif self.levelMap[i][j] == "S":
@@ -198,13 +199,17 @@ class LevelTwo(Level):
             self.bild(self.screen)
             self.all_sprites_mag.update(eventt)
             self.robber.find_box(self.boxs)
+            self.mag.find_box(self.boxs)
+            for i in self.monsterss:
+                i.find_box(self.boxs)
             self.all_sprites_robber.update(eventt)
             self.all_monsterss.update(eventt)
             self.all_sprites_coins.update(eventt, mag=self.mag, robber=self.robber, coinsCollect=self.coinsCollect)
             self.all_sprites_magicdoor.update(eventt, mag=self.mag, levelMap=self.levelMap)
             self.all_sprites_lever.update(eventt, mag=self.mag, robber=self.robber)
-            self.all_sprites_button.update(eventt, mag=self.mag, robber=self.robber)
+            self.all_sprites_button.update(eventt, mag=self.mag, robber=self.robber, boxes=self.boxs)
             self.all_sprites_door.update(eventt, mag=self.mag, robber=self.robber, levelMap=self.levelMap)
+            self.all_sprites_box.update(event)
             # self.all_sprites_box.update(eventt)
             for i in self.gorizontaldoors:
                 i.check(self.levelMap)
@@ -243,6 +248,7 @@ class LevelThree(Level):
             self.all_sprites_lever.update(eventt, mag=self.mag, robber=self.robber)
             self.all_sprites_button.update(eventt, mag=self.mag, robber=self.robber)
             self.all_sprites_door.update(eventt, mag=self.mag, robber=self.robber, levelMap=self.levelMap)
+            
             self.all_sprites_spikes.update(eventt)
             for i in self.gorizontaldoors:
                 i.check(self.levelMap)
@@ -259,17 +265,17 @@ def load_image(name, colorkey=None):
     image = pygame.image.load(fullname)
     return image
 
-# with open("data\level_2.txt") as f:
-#     level = f.read()  
-# if __name__ == "__main__":    
-#     LevelTwo(levelMap=level.split("\n"), background=load_image("background_lvl_2.jpg")).paint()
+with open("data\level_2.txt") as f:
+    level = f.read()  
+if __name__ == "__main__":    
+    LevelTwo(levelMap=level.split("\n"), background=load_image("background_lvl_2.jpg")).paint()
 
 # with open("data\level_1.txt") as f:
 #     level = f.read()  
 # if __name__ == "__main__":    
 #     LevelOne(levelMap=level.split("\n"), background=load_image("background_lvl_1.jpg")).paint()
 
-with open("data\level_3.txt") as f:
-    level = f.read()  
-if __name__ == "__main__":    
-    LevelThree(levelMap=level.split("\n"), background=load_image("background_lvl_3.jpg")).paint()
+# with open("data\level_3.txt") as f:
+#     level = f.read()  
+# if __name__ == "__main__":    
+#     LevelThree(levelMap=level.split("\n"), background=load_image("background_lvl_3.jpg")).paint()

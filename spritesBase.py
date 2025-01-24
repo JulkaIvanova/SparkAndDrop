@@ -77,13 +77,13 @@ class  MovableGameSprite(GameSprite):
     def can_jump_through(self, block_content):
         return not self.can_stay(block_content)
     
-    def fall(self):
+    def fall(self, colide_with_box=None):
         if self.jump_in_progress:
             return
         
         distance = self.vspeed / commonConsts.FPS
         offset = 0
-        if self.can_stay(self.level_map[self.get_bottom_cell_y(1)][self.get_left_cell_x()]) or self.can_stay(self.level_map[self.get_bottom_cell_y(1)][self.get_right_cell_x()]):
+        if self.can_stay(self.level_map[self.get_bottom_cell_y(1)][self.get_left_cell_x()]) or self.can_stay(self.level_map[self.get_bottom_cell_y(1)][self.get_right_cell_x()]) or colide_with_box=="left":
             return
 
         full_distance = True
@@ -92,8 +92,9 @@ class  MovableGameSprite(GameSprite):
             offset+=commonConsts.BLOCK_SIZE
             if offset>distance:
                 offset = distance
-            if self.can_stay(self.level_map[self.get_bottom_cell_y(offset)][self.get_left_cell_x()]) or self.can_stay(self.level_map[self.get_bottom_cell_y(offset)][self.get_right_cell_x()]):
+            if self.can_stay(self.level_map[self.get_bottom_cell_y(offset)][self.get_left_cell_x()]) or self.can_stay(self.level_map[self.get_bottom_cell_y(offset)][self.get_right_cell_x()]) or colide_with_box=="left":
                 full_distance = False
+                print('s')
                 break
             blocks+=1
         if full_distance:
@@ -289,17 +290,17 @@ class  MovableGameSprite(GameSprite):
     def do_update(self):
         pass
 
-    def jump(self):
+    def jump(self, colide_with_box=None):
         if self.jump_in_progress:
             return
 
-        if not self.can_stay(self.level_map[self.get_bottom_cell_y(1)][self.get_left_cell_x()]) and not self.can_stay(self.level_map[self.get_bottom_cell_y(1)][self.get_right_cell_x()]):
+        if not self.can_stay(self.level_map[self.get_bottom_cell_y(1)][self.get_left_cell_x()]) and not self.can_stay(self.level_map[self.get_bottom_cell_y(1)][self.get_right_cell_x()]) and not colide_with_box == "left":
             return
 
         self.jump_in_progress = True
         self._process_jump()
 
-    def move(self, can_fall = True, flip_on_stop = False, distance = 0):
+    def move(self, can_fall = True, flip_on_stop = False, distance = 0, colide_with_box=None):
         if distance == 0:
             distance = self.hspeed // commonConsts.FPS  # При таком подходе скорость спрайта должна быть кратна fps, иначе она будет урезаться
         if distance == 0:
@@ -311,6 +312,7 @@ class  MovableGameSprite(GameSprite):
         last_success_right = self.get_right_cell_x()
         last_success_left = self.get_right_cell_x()
         while offset<distance:
+            
             offset+=commonConsts.BLOCK_SIZE
             if offset>distance:
                 offset = distance
@@ -331,7 +333,7 @@ class  MovableGameSprite(GameSprite):
                 block_back = right
                 block_front = left
 
-            if not self.can_move(self.level_map[self.get_bottom_cell_y()][block_front]) or not self.can_move(self.level_map[self.get_top_cell_y()][block_front]):
+            if not self.can_move(self.level_map[self.get_bottom_cell_y()][block_front]) or not self.can_move(self.level_map[self.get_top_cell_y()][block_front]) or colide_with_box == 'left':
                 full_distance = False
                 if self.right_direction:
                     self.set_right_cell_x(last_success_right)

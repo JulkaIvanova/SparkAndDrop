@@ -82,14 +82,9 @@ class MagicDoor(spritesBase.GameSprite):
         # self.open = False
 
     def update(self, *args, mag: spritesBase.GameSprite, levelMap):
-        # if pygame.sprite.collide_mask(mag, self):
-        # if levelMap[int(mag.ypos//40)][int(mag.xpos//40)-1] == "I" or levelMap[int(mag.ypos//40)][int(mag.xpos//40)+1] == "I":
         if levelMap[int(mag.get_top_cell_y())][int(mag.get_left_cell_x()) - 1] == "I" or \
                 levelMap[int(mag.get_top_cell_y())][int(mag.get_left_cell_x()) + 1] == "I":
-            # print(6)
             if args and pygame.key.get_pressed()[pygame.K_e]:
-                # self.open = True
-                # print(8)
                 levelMap[int(self.rect.y // 40)] = levelMap[int(self.rect.y // 40)][:int(self.rect.x // 40)] + "." + \
                                                    levelMap[int(self.rect.y // 40)][int(self.rect.x // 40) + 1:]
                 levelMap[int(self.rect.y // 40) + 1] = levelMap[int(self.rect.y // 40) + 1][
@@ -105,13 +100,36 @@ class Button(spritesBase.GameSprite):
     def __init__(self, *group, x, y):
         super().__init__(Button.image, x, y, *group, width=40)
         self.activate = False
+        self.box = None
 
-    def update(self, *args, mag, robber):
+    
+    def check_sprite_inside(self, sprite):
+        """
+        Проверяет, находится ли спрайт большей частью внутри двери.
+
+        :param sprite: Игровой спрайт (маг или вор).
+        :return: True, если большая часть спрайта внутри двери, иначе False.
+        """
+        intersection = self.rect.clip(sprite.rect)
+
+        sprite_area = sprite.rect.width * sprite.rect.height
+        intersection_area = intersection.width * intersection.height
+
+        return intersection_area > 0.4 * sprite_area
+
+    def update(self, *args, mag, robber, boxes=None):
+        if boxes is not None:
+            self.box = None
+            for i in boxes:
+                if self.check_sprite_inside(i):
+                    self.box = i
         if args and ((pygame.sprite.collide_mask(self, mag) and pygame.key.get_pressed()[pygame.K_q]) or (
-                pygame.sprite.collide_mask(self, robber) and pygame.key.get_pressed()[pygame.K_u])):
+                pygame.sprite.collide_mask(self, robber) and pygame.key.get_pressed()[pygame.K_u])) or self.box:
             self.activate = True
         else:
             self.activate = False
+    
+    
 
 
 class Lever(spritesBase.GameSprite):
@@ -189,6 +207,34 @@ class Box(spritesBase.MovableGameSprite):
         self.robber = robber
         self.mag = mag
         self.levelMap = levelMap
+        self.ceracter_near = False
+        self.direction = None
+    def can_move(self, block_content):
+        return block_content in ".@$7XB0*"
+
+    def can_stay(self, block_content):
+        return block_content in "#-"
+    
+    def chek_colide_with_ceracter_botton(self, *args):
+        if (self.mag.rect.top <= self.rect.bottom <= self.mag.rect.top + 10 or self.robber.rect.top <= self.rect.bottom <= self.robber.rect.top + 10) and self.ceracter_near:
+            print(9)
+            return 'left'
+    
+    def do_update(self, *args):
+        
+        
+        if self.ceracter_near:
+            if self.direction == "left":
+                self.set_direction(False)
+                self.move()
+            if self.direction == "right":
+                self.set_direction(True)
+                self.move()
+    
+    def update(self, *args):
+        self.fall(self.chek_colide_with_ceracter_botton(*args))
+        self._process_jump()
+        self.do_update(*args)
 
 
 class Spike(spritesBase.GameSprite):
@@ -257,17 +303,43 @@ class Monsters(spritesBase.MovableGameSprite):
         super().__init__(Monsters.image, x, y, *group, width=40, height=40, level_map=levelMap, hspeed=120)
         self.mag = mag
         self.robber = robber
+        self.box = None
+        self.colide = None
 
     def can_move(self, block_content):
         return block_content in ".@$7XB"
 
     def can_stay(self, block_content):
         return block_content in "#-"
+    
+    def find_box(self, boxes):
+        self.box = None
+        for i in boxes:
+            if pygame.sprite.collide_mask(self, i):
+                self.box = i
+                self.box.ceracter_near = True
+
+    def chek_colide_with_box_right(self, box, *args):
+        if box is None:
+            return
+        if box.rect.left - 10 <= self.rect.right <= box.rect.left + 10:
+            return 'left'
+        print(box.rect.left, self.rect.right)
+    
+    # def chek_colide_with_box_left(self, box, *args):
+    #     if box is None:
+    #         return
+    #     if box.rect.right - 10 <= self.rect.left <= box.rect.right + 10:
+    #         return 'left'
 
     def do_update(self, *args):
         if pygame.sprite.collide_mask(self, self.mag):
             self.mag.alive = False
-        self.move(False, True)
+        if self.chek_colide_with_box_right(self.box, *args):
+            self.colide = self.chek_colide_with_box_right(self.box, *args)
+        # elif self.chek_colide_with_box_left(self.box, *args):
+        #     self.colide = self.chek_colide_with_box_left(self.box, *args)
+        self.move(False, True, colide_with_box=self.colide)
         if pygame.sprite.collide_mask(self, self.robber):
             if args and pygame.key.get_pressed()[pygame.K_DOWN]:
                 self.kill()
@@ -281,6 +353,7 @@ class Mag(spritesBase.MovableGameSprite):
     def __init__(self, *group, x, y, levelMap):
         super().__init__(Mag.image, x, y, *group, width=40, height=40, level_map=levelMap, hspeed=240)
         self.alive = True
+        self.box = None
 
     def can_move(self, block_content):
         return block_content in [".", "$", "@", "X", "7", "*", "0", "T", "S", "B"]
@@ -288,15 +361,51 @@ class Mag(spritesBase.MovableGameSprite):
     def can_stay(self, block_content):
         return not (block_content in [".", "$", "@", "X", "7", "*", "0", "T", "S", "B"])
 
+    def find_box(self, boxes):
+        if self.box != None:
+            self.box.direction = False
+            self.box.ceracter_near = False
+        self.box = None
+        for i in boxes:
+            if pygame.sprite.collide_mask(self, i):
+                self.box = i
+                self.box.ceracter_near = True
+
+    def chek_colide_with_box_right(self, box, *args):
+        if box is None:
+            return
+        if box.rect.left - 10 <= self.rect.right <= box.rect.left + 10:
+            return 'left'
+        
+    
+    def chek_colide_with_box_left(self, box, *args):
+        if box is None:
+            return
+        if box.rect.right - 10 <= self.rect.left <= box.rect.right + 10:
+            return 'left'
+    
+    def chek_colide_with_box_top(self, box, *args):
+        if box is None:
+            return
+        if box.rect.top <= self.rect.bottom <= box.rect.top + 10:
+            return 'left'
+
     def do_update(self, *args):
         if args and pygame.key.get_pressed()[pygame.K_d]:
-            self.set_direction(True)
-            self.move()
+            if self.chek_colide_with_box_right(self.box, *args) != 'left':
+                self.set_direction(True)
+                self.move()
         if args and pygame.key.get_pressed()[pygame.K_a]:
-            self.set_direction(False)
-            self.move()
+            if self.chek_colide_with_box_left(self.box, *args) != 'left':
+                self.set_direction(False)
+                self.move()
         if args and pygame.key.get_pressed()[pygame.K_w]:
-            self.jump()
+            self.jump(self.chek_colide_with_box_top(self.box, *args))
+    
+    def update(self, *args):
+        self.fall(self.chek_colide_with_box_top(self.box, *args))
+        self._process_jump()
+        self.do_update(*args)
 
 
 class Robber(spritesBase.MovableGameSprite):
@@ -314,35 +423,41 @@ class Robber(spritesBase.MovableGameSprite):
         return not (block_content in [".", "$", "@", "X", "7", "*", "0", "T", "S", "B"])
     
     def find_box(self, boxes):
+        if self.box != None:
+            self.box.direction = False
+            self.box.ceracter_near = False
         self.box = None
         for i in boxes:
             if pygame.sprite.collide_mask(self, i):
                 self.box = i
+                self.box.ceracter_near = True
 
     def chek_colide_with_box_right(self, box, *args):
         if box is None:
             return
-        if self.rect.right == box.rect.left and args and pygame.key.get_pressed()[pygame.K_RIGHT]:
-            print(6)
+        if box.rect.left - 10 <= self.rect.right <= box.rect.left + 10:
+            box.direction = 'right'
+            
             return 'left'
-        return 'left'
-        print(7)
+        
     
     def chek_colide_with_box_left(self, box, *args):
         if box is None:
+            # box.ceracter_near = False
+            # box.direction = None
             return
-        if self.rect.left-1 == box.rect.right and args and pygame.key.get_pressed()[pygame.K_LEFT]:
-            print(9)
+        if box.rect.right - 10 <= self.rect.left <= box.rect.right + 10:
+            box.direction = 'left'
+            # box.ceracter_near = True
             return 'left'
-        return 'left'
     
     def chek_colide_with_box_top(self, box, *args):
         if box is None:
             return
-        if self.rect.bottom+10 == box.rect.top:
+        if box.rect.top <= self.rect.bottom <= box.rect.top + 10:
             print(9)
             return 'left'
-        return 'left'
+
         
 
     def do_update(self, *args):
@@ -355,11 +470,10 @@ class Robber(spritesBase.MovableGameSprite):
                 self.set_direction(False)
                 self.move()
         if args and pygame.key.get_pressed()[pygame.K_UP]:
-            self.jump()
+            self.jump(self.chek_colide_with_box_top(self.box, *args))
     
     def update(self, *args):
-        if self.chek_colide_with_box_top(self.box, *args) != 'left':
-            self.fall()
+        self.fall(self.chek_colide_with_box_top(self.box, *args))
         self._process_jump()
         self.do_update(*args)
 
