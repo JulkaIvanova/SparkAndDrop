@@ -1,5 +1,6 @@
 import pygame
 import begingGame
+import sounds
 
 class Board:
     # создание поля
@@ -75,6 +76,7 @@ if __name__ == "__main__":
             if event.type == pygame.QUIT:
                 running = False
             if event.type == pygame.MOUSEBUTTONUP:
+                sounds.choose_sound.play()
                 if board.coordinates(event.pos) in [(12, 13), (12, 14), (13, 13), (13, 14), (14, 13), (14, 14), (15, 13), (15, 14), (16, 13), (16, 14), (17, 13), (17, 14)]:
                     begingGame.BegingGame().start()
 

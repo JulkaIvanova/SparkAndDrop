@@ -2,7 +2,7 @@ import pygame
 import os
 import sys
 import levels
-
+import sounds
 
 
 class BegingGame:
@@ -34,6 +34,7 @@ class BegingGame:
                 if event.type == pygame.QUIT:
                     running = False
                 if event.type == pygame.MOUSEBUTTONUP:
+                    sounds.book_sound.play()
                     if cnt >= 1:
                         running = False
                         levels.Levels().start()
