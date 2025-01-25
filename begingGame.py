@@ -35,6 +35,7 @@ class BegingGame:
                     running = False
                 if event.type == pygame.MOUSEBUTTONUP:
                     if cnt >= 1:
+                        running = False
                         levels.Levels().start()
                     img = self.load_image("two.png")
                     img = pygame.transform.scale(img, (1200, 800))
@@ -46,4 +47,4 @@ class BegingGame:
 
             pygame.display.flip()
 
-        pygame.quit()
+        # pygame.quit()

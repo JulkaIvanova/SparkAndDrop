@@ -132,6 +132,40 @@ class Level:
         self.all_sprites_box.draw(screen)
         self.all_sprites_spikes.draw(screen)
 
+    def display_message(self, message, color, pos=None):
+        """Отображение сообщения на экране."""
+        font = pygame.font.Font(None, 74)  # Размер шрифта
+        text = font.render(message, True, color)
+        if pos is None:
+            text_rect = text.get_rect(center=(self.screen.get_width() // 2, self.screen.get_height() // 2))
+        else:
+            text_rect = text.get_rect(center=(pos[0], pos[1]))
+        self.screen.blit(text, text_rect)
+        pygame.display.flip()
+
+        # Задержка перед завершением
+        pygame.time.wait(1500)
+
+    def show_win_screen(self, time):
+        """Показ окна победы."""
+        self.screen.fill((0, 128, 0))  # Зелёный фон
+        self.display_message("Победа!", (255, 255, 255))
+        self.show_resalt_screen(time)
+        # self.display_message("Результаты:", (255, 255, 255))
+
+    def show_resalt_screen(self, time):
+        """Показ окна результатов."""
+        self.screen.fill((169, 69, 69))
+        #self.display_message("Победа!", (255, 255, 255))
+        self.display_message("Результаты:", (255, 255, 255), (600, 200))
+        self.display_message(f"Собрано монет: {self.coinsCollect.cnt}/{self.coins}", (255, 255, 255), (600, 300))
+        self.display_message(f"Времени затрачено: {time} сек", (255, 255, 255), (600, 400))
+
+    def show_lose_screen(self):
+        """Показ окна поражения."""
+        self.screen.fill((128, 0, 0))  # Красный фон
+        self.display_message("Поражение!", (255, 255, 255))
+
 
 class LevelOne(Level):
     def __init__(self, levelMap, background):
@@ -155,8 +189,19 @@ class LevelOne(Level):
                     self.running = False
                 if event.type == pygame.MOUSEBUTTONDOWN or event.type == pygame.KEYDOWN:
                     eventt = event
-            if not(self.mag.alive) or not(self.robber.alive):
+
+            # Проверка условий поражения
+            if not self.mag.alive or not self.robber.alive:
+                self.show_lose_screen()
                 self.running = False
+                break
+            
+            #Проверка условий победы
+            if self.doors[0].near_door and self.doors[1].near_door:
+                self.show_win_screen()
+                self.running = False
+                break
+
             self.bild(self.screen)
             self.all_sprites_mag.update(eventt)
             self.all_sprites_robber.update(eventt)
@@ -186,6 +231,7 @@ class LevelTwo(Level):
         self.verticaldoors[1].connect('', self.buttons[1], "button")
         self.verticaldoors[2].connect('3', self.buttons[4], "button")
         self.verticaldoors[3].connect('4', self.buttons[3], "button")
+
         while self.running:
             eventt = None
             self.screen.fill((0, 0, 0))
@@ -194,8 +240,22 @@ class LevelTwo(Level):
                     self.running = False
                 if event.type == pygame.MOUSEBUTTONDOWN or event.type == pygame.KEYDOWN:
                     eventt = event
-            if not(self.mag.alive) or not(self.robber.alive):
+
+            # Проверка условий поражения
+            if not self.mag.alive or not self.robber.alive:
+                # self.running = False
+                self.show_lose_screen()
                 self.running = False
+                break
+
+            #Проверка условий победы
+            if self.doors[0].near_door and self.doors[1].near_door:
+                # time = self.clock.tick()/1000
+                self.show_win_screen(self.time)
+                self.running = False
+                break
+
+            # Основной цикл отрисовки и обновления объектов
             self.bild(self.screen)
             self.all_sprites_mag.update(eventt)
             self.robber.find_box(self.boxs)
@@ -209,14 +269,14 @@ class LevelTwo(Level):
             self.all_sprites_lever.update(eventt, mag=self.mag, robber=self.robber)
             self.all_sprites_button.update(eventt, mag=self.mag, robber=self.robber, boxes=self.boxs)
             self.all_sprites_door.update(eventt, mag=self.mag, robber=self.robber, levelMap=self.levelMap)
-            self.all_sprites_box.update(event)
-            # self.all_sprites_box.update(eventt)
+            self.all_sprites_box.update(eventt)
             for i in self.gorizontaldoors:
                 i.check(self.levelMap)
             for i in self.verticaldoors:
                 i.check(self.levelMap)
-            self.clock.tick(commonConsts.FPS)
+            self.time=self.clock.tick(commonConsts.FPS)
             pygame.display.flip()
+
 
 
 class LevelThree(Level):
@@ -226,19 +286,33 @@ class LevelThree(Level):
     def paint(self):
         self.init()
         pygame.display.set_caption("Уровень 3")
+
         self.verticaldoors[0].connect('5', self.levers[0], "lever")
         self.gorizontaldoors[0].connect('2', self.levers[1], "lever")
         self.gorizontaldoors[1].connect('1', self.levers[2], "lever")
+
         while self.running:
             eventt = None
             self.screen.fill((0, 0, 0))
+
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     self.running = False
                 if event.type == pygame.MOUSEBUTTONDOWN or event.type == pygame.KEYDOWN:
                     eventt = event
-            if not(self.mag.alive) or not(self.robber.alive):
+
+            # Проверка условий поражения
+            if not self.mag.alive or not self.robber.alive:
+                self.show_lose_screen()
                 self.running = False
+                break
+            
+            #Проверка условий победы
+            if self.doors[0].near_door and self.doors[1].near_door:
+                self.show_win_screen(self.time)
+                self.running = False
+                break
+
             self.bild(self.screen)
             self.all_sprites_mag.update(eventt)
             self.all_sprites_robber.update(eventt)
@@ -254,7 +328,84 @@ class LevelThree(Level):
                 i.check(self.levelMap)
             for i in self.verticaldoors:
                 i.check(self.levelMap)
-            self.clock.tick(commonConsts.FPS)
+            self.time = self.clock.tick(commonConsts.FPS)
+            pygame.display.flip()
+
+
+class LevelFour(Level):
+    def __init__(self, levelMap, background):
+        super().__init__(levelMap, background)
+
+    def paint(self):
+        self.init()
+        pygame.display.set_caption("Уровень 4")
+
+        self.gorizontaldoors[0].connect('1', self.buttons[1], "button")
+        self.gorizontaldoors[4].connect('1', self.buttons[1], "button")
+
+        self.gorizontaldoors[1].connect('2', self.buttons[0], "button")
+        self.gorizontaldoors[3].connect('2', self.buttons[0], "button")
+        self.gorizontaldoors[9].connect('2', self.buttons[0], "button")
+
+        self.gorizontaldoors[5].connect('3', self.buttons[2], "button")
+        self.gorizontaldoors[6].connect('3', self.buttons[2], "button")
+
+        self.verticaldoors[0].connect('4', self.buttons[3], "button")
+        self.gorizontaldoors[7].connect('4', self.buttons[3], "button")
+
+        self.gorizontaldoors[2].connect('7', self.levers[0], "lever")
+
+        self.gorizontaldoors[8].connect('5', self.buttons[4], "button")
+        self.gorizontaldoors[10].connect('5', self.buttons[4], "button")
+        self.verticaldoors[1].connect('8', self.buttons[4], "button")
+
+        self.gorizontaldoors[13].connect('8', self.levers[1], "lever")
+
+        self.verticaldoors[2].connect('9', self.buttons[5], "button")
+        self.verticaldoors[3].connect('9', self.buttons[5], "button")
+
+        self.gorizontaldoors[11].connect('10', self.buttons[6], "button")
+
+        self.gorizontaldoors[12].connect('11', self.buttons[7], "button")
+
+        while self.running:
+            eventt = None
+            self.screen.fill((0, 0, 0))
+
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    self.running = False
+                if event.type == pygame.MOUSEBUTTONDOWN or event.type == pygame.KEYDOWN:
+                    eventt = event
+
+            # Проверка условий поражения
+            if not self.mag.alive or not self.robber.alive:
+                self.show_lose_screen()
+                self.running = False
+                break
+            
+            #Проверка условий победы
+            if self.doors[0].near_door and self.doors[1].near_door:
+                self.show_win_screen(self.time)
+                self.running = False
+                break
+
+            self.bild(self.screen)
+            self.all_sprites_mag.update(eventt)
+            self.all_sprites_robber.update(eventt)
+            self.all_monsterss.update(eventt)
+            self.all_sprites_coins.update(eventt, mag=self.mag, robber=self.robber, coinsCollect=self.coinsCollect)
+            self.all_sprites_magicdoor.update(eventt, mag=self.mag, levelMap=self.levelMap)
+            self.all_sprites_lever.update(eventt, mag=self.mag, robber=self.robber)
+            self.all_sprites_button.update(eventt, mag=self.mag, robber=self.robber)
+            self.all_sprites_door.update(eventt, mag=self.mag, robber=self.robber, levelMap=self.levelMap)
+            self.all_sprites_spikes.update(eventt)
+
+            for i in self.gorizontaldoors:
+                i.check(self.levelMap)
+            for i in self.verticaldoors:
+                i.check(self.levelMap)
+            self.time = self.clock.tick(commonConsts.FPS)
             pygame.display.flip()
 
 def load_image(name, colorkey=None):
@@ -265,10 +416,10 @@ def load_image(name, colorkey=None):
     image = pygame.image.load(fullname)
     return image
 
-with open("data\level_2.txt") as f:
-    level = f.read()  
-if __name__ == "__main__":    
-    LevelTwo(levelMap=level.split("\n"), background=load_image("background_lvl_2.jpg")).paint()
+# with open("data\level_2.txt") as f:
+#     level = f.read()  
+# if __name__ == "__main__":    
+#     LevelTwo(levelMap=level.split("\n"), background=load_image("background_lvl_2.jpg")).paint()
 
 # with open("data\level_1.txt") as f:
 #     level = f.read()  
@@ -279,3 +430,8 @@ if __name__ == "__main__":
 #     level = f.read()  
 # if __name__ == "__main__":    
 #     LevelThree(levelMap=level.split("\n"), background=load_image("background_lvl_3.jpg")).paint()
+
+# with open("data\level_4.txt") as f:
+#     level = f.read()  
+# if __name__ == "__main__":    
+#     LevelFour(levelMap=level.split("\n"), background=load_image("background_lvl_4.jpg")).paint()

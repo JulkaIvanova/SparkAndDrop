@@ -49,13 +49,13 @@ class Door(spritesBase.GameSprite):
     def __init__(self, *group, x, y):
         super().__init__(Door.image, x, y, *group, width=40, height=80)
         self.win = False
-        near_door = False
+        self.near_door = False
 
     def update(self, *args, mag: spritesBase.GameSprite, robber: spritesBase.GameSprite, levelMap):
         # print('wefj')
         if self.check_sprite_inside(mag) or self.check_sprite_inside(robber):
             self.near_door = True
-            print('wpjfpwejfijweiopfjwoi')
+            # print('wpjfpwejfijweiopfjwoi')
         else:
             self.near_door = False
 
@@ -324,7 +324,7 @@ class Monsters(spritesBase.MovableGameSprite):
             return
         if box.rect.left - 10 <= self.rect.right <= box.rect.left + 10:
             return 'left'
-        print(box.rect.left, self.rect.right)
+        # print(box.rect.left, self.rect.right)
     
     # def chek_colide_with_box_left(self, box, *args):
     #     if box is None:
@@ -335,8 +335,8 @@ class Monsters(spritesBase.MovableGameSprite):
     def do_update(self, *args):
         if pygame.sprite.collide_mask(self, self.mag):
             self.mag.alive = False
-        if self.chek_colide_with_box_right(self.box, *args):
-            self.colide = self.chek_colide_with_box_right(self.box, *args)
+        # if self.chek_colide_with_box_right(self.box, *args):
+        #     self.colide = self.chek_colide_with_box_right(self.box, *args)
         # elif self.chek_colide_with_box_left(self.box, *args):
         #     self.colide = self.chek_colide_with_box_left(self.box, *args)
         self.move(False, True, colide_with_box=self.colide)
