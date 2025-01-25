@@ -127,7 +127,6 @@ class Button(spritesBase.GameSprite):
                     self.box = i
         if args and ((pygame.sprite.collide_mask(self, mag) and pygame.key.get_pressed()[pygame.K_q]) or (
                 pygame.sprite.collide_mask(self, robber) and pygame.key.get_pressed()[pygame.K_u])) or self.box:
-            sounds.choose_sound.play()
             self.activate = True
         else:
             self.activate = False
