@@ -110,6 +110,7 @@ class Levels:
                         self.level = ClassLevel.LevelFour(levelMap=level.split("\n"), background=load_image("background_lvl_4.jpg")).paint()
                         print("4")
                     elif self.board.coordinates(event.pos) in [(13, 16), (13, 17), (14, 16), (14, 17), (15, 16), (15, 17), (16, 16), (16, 17)]:
+                        sounds.choose_sound.play()
                         running = False
                         print("exit")
             img = load_image("levels.png")

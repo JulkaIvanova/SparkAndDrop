@@ -4,6 +4,7 @@ import sys
 import math
 import commonConsts
 import spritesBase
+import sounds
 
 pygame.init()
 
@@ -39,6 +40,7 @@ class Coin(spritesBase.GameSprite):
 
     def update(self, *args, mag, robber, coinsCollect):
         if pygame.sprite.collide_mask(self, mag) or pygame.sprite.collide_mask(self, robber):
+            sounds.coin_sound.play()
             self.kill()
             coinsCollect.cnt += 1
 
@@ -125,6 +127,7 @@ class Button(spritesBase.GameSprite):
                     self.box = i
         if args and ((pygame.sprite.collide_mask(self, mag) and pygame.key.get_pressed()[pygame.K_q]) or (
                 pygame.sprite.collide_mask(self, robber) and pygame.key.get_pressed()[pygame.K_u])) or self.box:
+            sounds.choose_sound.play()
             self.activate = True
         else:
             self.activate = False
@@ -144,6 +147,7 @@ class Lever(spritesBase.GameSprite):
         if event is not None and event.type == pygame.KEYDOWN:  # Проверяем, что это событие нажатия клавиши
             if ((self.check_sprite_inside(mag) and event.key == pygame.K_q) or
                     (self.check_sprite_inside(robber) and event.key == pygame.K_u)):
+                sounds.choose_sound.play()
                 self.activate = not self.activate
 
     def check_sprite_inside(self, sprite):
@@ -334,6 +338,7 @@ class Monsters(spritesBase.MovableGameSprite):
 
     def do_update(self, *args):
         if pygame.sprite.collide_mask(self, self.mag):
+            sounds.fight_sound.play()
             self.mag.alive = False
         # if self.chek_colide_with_box_right(self.box, *args):
         #     self.colide = self.chek_colide_with_box_right(self.box, *args)
@@ -342,8 +347,10 @@ class Monsters(spritesBase.MovableGameSprite):
         self.move(False, True, colide_with_box=self.colide)
         if pygame.sprite.collide_mask(self, self.robber):
             if args and pygame.key.get_pressed()[pygame.K_DOWN]:
+                sounds.fight_sound.play()
                 self.kill()
             else:
+                sounds.fight_sound.play()
                 self.robber.alive = False
 
 

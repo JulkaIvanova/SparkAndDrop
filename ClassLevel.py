@@ -3,7 +3,7 @@ import ClassSprites
 import os
 import sys
 import commonConsts
-
+import sounds
 
 
 
@@ -192,13 +192,15 @@ class LevelOne(Level):
 
             # Проверка условий поражения
             if not self.mag.alive or not self.robber.alive:
+                sounds.loose_sound.play()
                 self.show_lose_screen()
                 self.running = False
                 break
             
             #Проверка условий победы
             if self.doors[0].near_door and self.doors[1].near_door:
-                self.show_win_screen()
+                sounds.win_sound.play()
+                self.show_win_screen(self.time)
                 self.running = False
                 break
 
@@ -214,7 +216,7 @@ class LevelOne(Level):
             for i in self.gorizontaldoors:
                 i.check(self.levelMap)
             self.verticaldoors[0].check(self.levelMap)
-            self.clock.tick(commonConsts.FPS)
+            self.time = self.clock.tick(commonConsts.FPS)
             pygame.display.flip()
 
 
@@ -244,6 +246,7 @@ class LevelTwo(Level):
             # Проверка условий поражения
             if not self.mag.alive or not self.robber.alive:
                 # self.running = False
+                sounds.loose_sound.play()
                 self.show_lose_screen()
                 self.running = False
                 break
@@ -251,6 +254,7 @@ class LevelTwo(Level):
             #Проверка условий победы
             if self.doors[0].near_door and self.doors[1].near_door:
                 # time = self.clock.tick()/1000
+                sounds.win_sound.play()
                 self.show_win_screen(self.time)
                 self.running = False
                 break
@@ -303,12 +307,14 @@ class LevelThree(Level):
 
             # Проверка условий поражения
             if not self.mag.alive or not self.robber.alive:
+                sounds.loose_sound.play()
                 self.show_lose_screen()
                 self.running = False
                 break
             
             #Проверка условий победы
             if self.doors[0].near_door and self.doors[1].near_door:
+                sounds.win_sound.play()
                 self.show_win_screen(self.time)
                 self.running = False
                 break
@@ -380,12 +386,14 @@ class LevelFour(Level):
 
             # Проверка условий поражения
             if not self.mag.alive or not self.robber.alive:
+                sounds.loose_sound.play()
                 self.show_lose_screen()
                 self.running = False
                 break
             
             #Проверка условий победы
             if self.doors[0].near_door and self.doors[1].near_door:
+                sounds.win_sound.play()
                 self.show_win_screen(self.time)
                 self.running = False
                 break
