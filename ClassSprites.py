@@ -354,10 +354,12 @@ class Monsters(spritesBase.MovableGameSprite):
 
 
 class Mag(spritesBase.MovableGameSprite):
-    image = load_image("mag.png")
+    image = load_image("mag_right.png")
 
     def __init__(self, *group, x, y, levelMap):
-        super().__init__(Mag.image, x, y, *group, width=40, height=40, level_map=levelMap, hspeed=240)
+        super().__init__(Mag.image, x, y, *group, width=40, height=40, level_map=levelMap, hspeed=240, jump_height=4*commonConsts.BLOCK_SIZE)
+        self.add_animation([0])
+        self.add_animation([0, 1, 2, 3])
         self.alive = True
         self.box = None
 
@@ -395,6 +397,12 @@ class Mag(spritesBase.MovableGameSprite):
             return
         if box.rect.top <= self.rect.bottom <= box.rect.top + 10:
             return 'left'
+        
+    def get_stay_animation(self) -> int:
+        return 0
+    
+    def get_move_animation(self) -> int:
+        return 1
 
     def do_update(self, *args):
         if args and pygame.key.get_pressed()[pygame.K_d]:
@@ -408,19 +416,21 @@ class Mag(spritesBase.MovableGameSprite):
         if args and pygame.key.get_pressed()[pygame.K_w]:
             self.jump(self.chek_colide_with_box_top(self.box, *args))
     
-    def update(self, *args):
-        self.fall(self.chek_colide_with_box_top(self.box, *args))
-        self._process_jump()
-        self.do_update(*args)
+    #def update(self, *args):
+    #    self.fall(self.chek_colide_with_box_top(self.box, *args))
+    #    self._process_jump()
+    #    self.do_update(*args)
 
 
 class Robber(spritesBase.MovableGameSprite):
-    image = load_image("robber.png")
+    image = load_image("rober_right.png")
 
     def __init__(self, *group, x, y, levelMap):
         super().__init__(Robber.image, x, y, *group, width=40, height=80, level_map=levelMap, hspeed=240)
         self.alive = True
         self.box = None
+        self.add_animation([3])
+        self.add_animation([0, 1, 2])
 
     def can_move(self, block_content):
         return block_content in [".", "$", "@", "X", "7", "*", "0", "T", "S", "B"]
@@ -445,8 +455,13 @@ class Robber(spritesBase.MovableGameSprite):
             box.direction = 'right'
             
             return 'left'
-        
     
+    def get_stay_animation(self) -> int:
+        return 0
+    
+    def get_move_animation(self) -> int:
+        return 1
+        
     def chek_colide_with_box_left(self, box, *args):
         if box is None:
             # box.ceracter_near = False
@@ -478,10 +493,10 @@ class Robber(spritesBase.MovableGameSprite):
         if args and pygame.key.get_pressed()[pygame.K_UP]:
             self.jump(self.chek_colide_with_box_top(self.box, *args))
     
-    def update(self, *args):
-        self.fall(self.chek_colide_with_box_top(self.box, *args))
-        self._process_jump()
-        self.do_update(*args)
+    # def update(self, *args):
+    #     self.fall(self.chek_colide_with_box_top(self.box, *args))
+    #     self._process_jump()
+    #     self.do_update(*args)
 
     # def update(self):
     #     if args and args[0].type == pygame.MOUSEBUTTONDOWN:

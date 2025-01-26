@@ -2,6 +2,7 @@ import pygame
 import commonConsts
 
 
+
 class GameSprite(pygame.sprite.Sprite):
     def __init__(self, image: pygame.Surface, x: int, y: int, *group, width=0, height=0):
         super().__init__(*group)
@@ -41,21 +42,88 @@ class GameSprite(pygame.sprite.Sprite):
     def set_bottom_cell_y(self, value):
         self.rect.bottom = value * commonConsts.BLOCK_SIZE + commonConsts.BLOCK_SIZE
     
-class  MovableGameSprite(GameSprite):
-    def __init__(self, image: pygame.Surface, x: int, y: int, *group, level_map, width=0, height=0, hspeed=0, vspeed=800, jump_height=3*commonConsts.BLOCK_SIZE, right_direction = False, left_direction_image: pygame.Surface = None):
+class AnimatedSprite(GameSprite):
+    def __init__(self, image: pygame.Surface, x: int, y: int, *group, width=0, height=0):
+        super().__init__(image, x, y, *group)
+        self.frames = []
+        
+        self._cut_sheet(image, width, height)
+        self.cur_frame = 0
+        self.image = self.frames[self.cur_frame]
+        self.cur_animation = 0
+        self.slowdown_step = 0
+        self.animation_slowdown = 10
+        self.animations = []
+        self.rect.x = x
+        self.rect.y = y
+
+    def add_animation(self, frame_seq):
+        self.animations.append(frame_seq)
+
+    def play_animation(self, animation_number: int = 0, slowdown = 10):
+        if animation_number == self.cur_animation:
+            return
+        self.animation_slowdown = slowdown
+        self.cur_animation = animation_number
+        self.cur_frame = -1
+        self.slowdown_step = 0
+
+
+    def _cut_sheet(self, sheet: pygame.Surface, frame_width: int, frame_height: int):        
+        sheet_width = sheet.get_width()
+        sheet_height = sheet.get_height()
+        if (frame_width==0) or (frame_width>sheet_width):
+            frame_width = sheet_width
+        if (frame_height==0) or (frame_height>sheet_height):
+            frame_height = sheet_height
+
+        self.rect = pygame.Rect(0, 0, frame_width, frame_height)
+
+        if (frame_width==sheet_width) and (frame_height==sheet_height):
+            self.frames.append(sheet)
+            return
+
+        for i in range(0, sheet_width, frame_width):
+            if (i+self.rect.width)>sheet_width:
+                break
+            for j in range(0, sheet_height, frame_height):
+                if (j+self.rect.height)>sheet_height:
+                    break
+                frame_location = (i, j)
+                self.frames.append(sheet.subsurface(pygame.Rect(frame_location, self.rect.size)))
+
+    def transform_frame(self, original_frame: pygame.Surface) -> pygame.Surface:
+        return original_frame
+
+    def update(self, *args):
+        if self.cur_animation>=len(self.animations): # если в списке нет указанной анимации, то проигрываем все кадры
+            if (self.cur_frame == -1) or (self.cur_frame>=len(self.frames)): # только запустили анимацию, либо прошли весь цикл
+                self.cur_frame = 0
+                self.slowdown_step=0
+            self.slowdown_step+=1
+            self.image = self.transform_frame(self.frames[self.cur_frame])
+        else:
+            if (self.cur_frame == -1) or (self.cur_frame>=len(self.animations[self.cur_animation])): # только запустили анимацию, либо прошли весь цикл
+                self.cur_frame = 0
+                self.slowdown_step=0
+            self.slowdown_step+=1
+            self.image = self.transform_frame(self.frames[self.animations[self.cur_animation][self.cur_frame]])
+
+        if self.slowdown_step>=self.animation_slowdown:
+            self.slowdown_step = 0
+            self.cur_frame+=1 
+
+class  MovableGameSprite(AnimatedSprite):
+    def __init__(self, image: pygame.Surface, x: int, y: int, *group, level_map, width=0, height=0, hspeed=0, vspeed=800, jump_height=3*commonConsts.BLOCK_SIZE, right_direction = False):
         super().__init__(image, x, y, *group, width= width, height=height)
         self.hspeed = hspeed
         self.vspeed = vspeed
         self.level_map = level_map
-        self.right_image = self.image
-        self.left_image = left_direction_image
         self.jump_height = jump_height
         self.current_jump_height = 0
         self.jump_in_progress = False
-        if self.left_image == None:
-            self.left_image = pygame.transform.flip(self.image, True, False)
-
         self.set_direction(right_direction)
+        self.was_stay = True
 
     def change_direction(self):
         self.set_direction(not self.right_direction)
@@ -63,10 +131,24 @@ class  MovableGameSprite(GameSprite):
 
     def set_direction(self, right: bool):
         self.right_direction = right
+
+    def transform_frame(self, original_frame: pygame.Surface) -> pygame.Surface:
         if self.right_direction:
-            self.image = self.right_image
-        else:
-            self.image = self.left_image
+            return original_frame
+        return pygame.transform.flip(original_frame, True, False)
+    
+    def get_stay_animation(self) -> int:
+        return 0
+    
+    def get_move_animation(self) -> int:
+        return 0
+    
+    def get_jump_animation(self) -> int:
+        return 0
+    
+    def get_fall_animation(self) -> int:
+        return 0
+
     
     def can_move(self, block_content):
         return True
@@ -85,6 +167,9 @@ class  MovableGameSprite(GameSprite):
         offset = 0
         if self.can_stay(self.level_map[self.get_bottom_cell_y(1)][self.get_left_cell_x()]) or self.can_stay(self.level_map[self.get_bottom_cell_y(1)][self.get_right_cell_x()]) or colide_with_box=="left":
             return
+        
+        self.play_animation(self.get_fall_animation())
+        self.was_stay = False
 
         full_distance = True
         blocks = 0
@@ -105,6 +190,9 @@ class  MovableGameSprite(GameSprite):
     def _process_jump(self):
         if not self.jump_in_progress:
             return
+        
+        self.play_animation(self.get_jump_animation())
+        self.was_stay = False
 
         if not self.can_jump_through(self.level_map[self.get_top_cell_y(-1)][self.get_left_cell_x()]) or \
                 not self.can_jump_through(self.level_map[self.get_top_cell_y(-1)][self.get_right_cell_x()]) or \
@@ -140,153 +228,6 @@ class  MovableGameSprite(GameSprite):
             self.jump_in_progress = False
             self.current_jump_height = 0
 
-    # def _process_jump(self):
-    #     if not self.jump_in_progress:
-    #         return
-    #
-    #     if not self.can_jump_through(self.level_map[self.get_top_cell_y(-1)][self.get_left_cell_x()]) or \
-    #        not self.can_jump_through(self.level_map[self.get_top_cell_y(-1)][self.get_right_cell_x()]) or \
-    #         self.current_jump_height>=self.jump_height:
-    #         self.jump_in_progress = False
-    #         self.current_jump_height = 0
-    #         return
-    #
-    #     distance = self.vspeed / commonConsts.FPS
-    #     if (self.current_jump_height+distance)>self.jump_height:
-    #         distance = self.jump_height - self.current_jump_height
-    #
-    #     full_distance = True
-    #     blocks = 0
-    #     offset = 0
-    #     while offset<distance:
-    #         offset+=commonConsts.BLOCK_SIZE
-    #         if offset>distance:
-    #             offset = distance
-    #         if not self.can_jump_through(self.level_map[self.get_top_cell_y(-offset)][self.get_left_cell_x()]) or \
-    #            not self.can_jump_through(self.level_map[self.get_top_cell_y(-offset)][self.get_right_cell_x()]):
-    #             full_distance = False
-    #             break
-    #         blocks+=1
-    #     if full_distance:
-    #         self.rect.top -= distance
-    #         self.current_jump_height +=distance
-    #         if self.current_jump_height>=self.jump_height:
-    #             self.jump_in_progress = False
-    #             self.current_jump_height = 0
-    #     else:
-    #         self.set_top_cell_y(self.get_top_cell_y()-blocks)
-    #         self.jump_in_progress = False
-    #         self.current_jump_height = 0
-
-    # def _process_jump(self):
-    #     if not self.jump_in_progress:
-    #         return
-    #
-    #     # Рассчитываем расстояние, которое нужно преодолеть за кадр
-    #     distance = self.vspeed / commonConsts.FPS
-    #     if self.current_jump_height + distance > self.jump_height:
-    #         distance = self.jump_height - self.current_jump_height
-    #
-    #     # Проверяем, можно ли пройти все расстояние
-    #     full_distance = True
-    #     offset = 0
-    #     while offset < distance:
-    #         offset += commonConsts.BLOCK_SIZE
-    #         if offset > distance:
-    #             offset = distance
-    #
-    #         # Проверяем, можно ли подняться выше
-    #         if not self.can_jump_through(self.level_map[self.get_top_cell_y(-offset)][self.get_left_cell_x()]) or \
-    #            not self.can_jump_through(self.level_map[self.get_top_cell_y(-offset)][self.get_right_cell_x()]):
-    #             full_distance = False
-    #             break
-    #
-    #     # Если можем пройти всё расстояние, поднимаемся
-    #     if full_distance:
-    #         self.rect.top -= distance
-    #         self.current_jump_height += distance
-    #
-    #     # Если достигнута максимальная высота или столкновение, завершаем прыжок
-    #     if self.current_jump_height >= self.jump_height or not full_distance:
-    #         self.jump_in_progress = False
-    #         self.current_jump_height = 0
-    # def _process_jump(self):
-    #     if not self.jump_in_progress:
-    #         return
-    #
-    #     # Используем баллистическое движение для расчета подъема
-    #     gravity = self.vspeed / (2 * self.jump_height)  # Определяем силу гравитации для баллистической траектории
-    #     velocity = (2 * self.jump_height * gravity) ** 0.5  # Начальная скорость прыжка
-    #
-    #     # Рассчитываем расстояние, которое нужно преодолеть за кадр
-    #     time_step = 1 / commonConsts.FPS
-    #     distance = velocity * time_step - 0.5 * gravity * (time_step ** 2)
-    #     velocity -= gravity * time_step
-    #
-    #     # Проверяем, можно ли пройти все расстояние
-    #     full_distance = True
-    #     offset = 0
-    #     while offset < distance:
-    #         offset += commonConsts.BLOCK_SIZE
-    #         if offset > distance:
-    #             offset = distance
-    #
-    #         # Проверяем, можно ли подняться выше
-    #         if not self.can_jump_through(self.level_map[self.get_top_cell_y(-offset)][self.get_left_cell_x()]) or \
-    #            not self.can_jump_through(self.level_map[self.get_top_cell_y(-offset)][self.get_right_cell_x()]):
-    #             full_distance = False
-    #             break
-    #
-    #     # Если можем пройти всё расстояние, поднимаемся
-    #     if full_distance:
-    #         self.rect.top -= distance
-    #         self.current_jump_height += distance
-    #
-    #     # Если достигнута максимальная высота или столкновение, завершаем прыжок
-    #     if self.current_jump_height >= self.jump_height or not full_distance:
-    #         self.jump_in_progress = False
-    #         self.current_jump_height = 0
-    # def _process_jump(self):
-    #     if not self.jump_in_progress:
-    #         return
-    #
-    #     # Если это первый кадр прыжка, инициализируем начальную скорость
-    #     if not hasattr(self, 'jump_velocity') or self.jump_velocity is None:
-    #         gravity = self.vspeed / (2 * self.jump_height)  # Определяем силу гравитации для баллистической траектории
-    #         self.jump_velocity = (2 * self.jump_height * gravity) ** 0.5  # Начальная скорость прыжка
-    #         self.gravity = gravity  # Сохраняем значение гравитации
-    #
-    #     # Рассчитываем расстояние, которое нужно преодолеть за кадр
-    #     time_step = 1 / commonConsts.FPS
-    #     distance = self.jump_velocity * time_step - 0.5 * self.gravity * (time_step ** 2)
-    #     self.jump_velocity -= self.gravity * time_step
-    #
-    #     # Проверяем, можно ли пройти все расстояние
-    #     full_distance = True
-    #     offset = 0
-    #     while offset < distance:
-    #         offset += commonConsts.BLOCK_SIZE
-    #         if offset > distance:
-    #             offset = distance
-    #
-    #         # Проверяем, можно ли подняться выше
-    #         if not self.can_jump_through(self.level_map[self.get_top_cell_y(-offset)][self.get_left_cell_x()]) or \
-    #            not self.can_jump_through(self.level_map[self.get_top_cell_y(-offset)][self.get_right_cell_x()]):
-    #             full_distance = False
-    #             break
-    #
-    #     # Если можем пройти всё расстояние, поднимаемся
-    #     if full_distance:
-    #         self.rect.top -= distance
-    #         self.current_jump_height += distance
-    #
-    #     # Если достигнута максимальная высота, столкновение или скорость упала до 0, завершаем прыжок
-    #     if self.current_jump_height >= self.jump_height or not full_distance or self.jump_velocity <= 0:
-    #         self.jump_in_progress = False
-    #         self.current_jump_height = 0
-    #         self.jump_velocity = None
-    #
-    #
     def do_update(self):
         pass
 
@@ -305,6 +246,9 @@ class  MovableGameSprite(GameSprite):
             distance = self.hspeed // commonConsts.FPS  # При таком подходе скорость спрайта должна быть кратна fps, иначе она будет урезаться
         if distance == 0:
             return
+        
+        self.play_animation(self.get_move_animation())
+        self.was_stay = False
 
         #Пока предполагаем, что максимальная высота спрайта два блока
         full_distance = True
@@ -372,9 +316,13 @@ class  MovableGameSprite(GameSprite):
 
     
     def update(self, *args):
+        super().update(*args)
+        self.was_stay = True
         self.fall()
         self._process_jump()
         self.do_update(*args)
+        if self.was_stay:
+            self.play_animation(self.get_stay_animation())
 
     # def is_majority_inside(self, door):
     #     """
