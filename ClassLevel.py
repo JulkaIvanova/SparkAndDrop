@@ -173,6 +173,7 @@ class LevelOne(Level):
 
     def paint(self):
         self.init()
+        self.time = pygame.time.get_ticks()
         for i in range(len(self.gorizontaldoors)):
             if i == 0:
                 cnt = ''
@@ -200,7 +201,7 @@ class LevelOne(Level):
             #Проверка условий победы
             if self.doors[0].near_door and self.doors[1].near_door:
                 sounds.win_sound.play()
-                self.show_win_screen(self.time)
+                self.show_win_screen((pygame.time.get_ticks()-self.time)//1000)
                 self.running = False
                 break
 
@@ -226,6 +227,7 @@ class LevelTwo(Level):
 
     def paint(self):
         self.init()
+        self.time = pygame.time.get_ticks()
         pygame.display.set_caption("Уровень 2")
         self.gorizontaldoors[0].connect('2', self.buttons[0], "button")
         self.gorizontaldoors[1].connect('1', self.buttons[2], "button")
@@ -255,7 +257,8 @@ class LevelTwo(Level):
             if self.doors[0].near_door and self.doors[1].near_door:
                 # time = self.clock.tick()/1000
                 sounds.win_sound.play()
-                self.show_win_screen(self.time)
+                # self.show_win_screen(pygame.time.Clock.get_time(self.clock))
+                self.show_win_screen((pygame.time.get_ticks()-self.time)//1000)
                 self.running = False
                 break
 
@@ -278,7 +281,7 @@ class LevelTwo(Level):
                 i.check(self.levelMap)
             for i in self.verticaldoors:
                 i.check(self.levelMap)
-            self.time=self.clock.tick(commonConsts.FPS)
+            self.clock.tick(commonConsts.FPS)
             pygame.display.flip()
 
 
@@ -290,7 +293,7 @@ class LevelThree(Level):
     def paint(self):
         self.init()
         pygame.display.set_caption("Уровень 3")
-
+        self.time = pygame.time.get_ticks()
         self.verticaldoors[0].connect('5', self.levers[0], "lever")
         self.gorizontaldoors[0].connect('2', self.levers[1], "lever")
         self.gorizontaldoors[1].connect('1', self.levers[2], "lever")
@@ -315,7 +318,7 @@ class LevelThree(Level):
             #Проверка условий победы
             if self.doors[0].near_door and self.doors[1].near_door:
                 sounds.win_sound.play()
-                self.show_win_screen(self.time)
+                self.show_win_screen((pygame.time.get_ticks()-self.time)//1000)
                 self.running = False
                 break
 
@@ -345,6 +348,7 @@ class LevelFour(Level):
     def paint(self):
         self.init()
         pygame.display.set_caption("Уровень 4")
+        self.time = pygame.time.get_ticks()
 
         self.gorizontaldoors[0].connect('1', self.buttons[1], "button")
         self.gorizontaldoors[4].connect('1', self.buttons[1], "button")
@@ -394,7 +398,7 @@ class LevelFour(Level):
             #Проверка условий победы
             if self.doors[0].near_door and self.doors[1].near_door:
                 sounds.win_sound.play()
-                self.show_win_screen(self.time)
+                self.show_win_screen((pygame.time.get_ticks()-self.time)//1000)
                 self.running = False
                 break
 
