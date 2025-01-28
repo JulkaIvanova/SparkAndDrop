@@ -1,6 +1,7 @@
 import pygame
 import begingGame
 import sounds
+import ruls
 
 class Board:
     # создание поля
@@ -77,14 +78,21 @@ if __name__ == "__main__":
             if event.type == pygame.QUIT:
                 running = False
             if event.type == pygame.MOUSEBUTTONUP:
-                sounds.choose_sound.play()
                 if board.coordinates(event.pos) in [(12, 13), (12, 14), (13, 13), (13, 14), (14, 13), (14, 14), (15, 13), (15, 14), (16, 13), (16, 14), (17, 13), (17, 14)]:
+                    sounds.choose_sound.play()
                     begingGame.BegingGame().start()
+                if board.coordinates(event.pos) in [(2, 17), (2, 18), (1, 17), (1, 18)]:
+                    sounds.choose_sound.play()
+                    ruls.Ruls().start()
 
         image = load_image("r2.png")
         image = pygame.transform.scale(image, (1200, 800))
         screen.blit(image, pos)
+        button = load_image("rules_button.png")
+        button = pygame.transform.scale(button, (80, 80))
+        screen.blit(button, (40, 680))
         # board.render(screen)
+        
 
         pygame.display.flip()
 

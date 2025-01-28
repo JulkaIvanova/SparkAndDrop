@@ -4,7 +4,7 @@ import sys
 import sounds
 
 
-class EndGame:
+class Ruls:
     def __init__(self):
         pygame.init()
         self.size = self.width, self.height = 1200, 800
@@ -20,12 +20,10 @@ class EndGame:
         return image
     
     def start(self):
-        img = self.load_image("three.png")
-        img = pygame.transform.scale(img, (1200, 800))
-        cnt = 0 
+        imgs = ['p_1.png', 'p_2.png', 'p_3.png', 'p_4.png', 'p_5.png', 'p_6.png', 'p_7.png', 'p_8.png']
+        n = 0
+        img = pygame.transform.scale(self.load_image(imgs[n]), (1200, 800))
         running = True
-        flag = False
-        pos = (0, 0)
         pygame.display.set_caption("Свой курсор мыши")
         while running:
             self.screen.fill((0, 0, 0))
@@ -34,15 +32,12 @@ class EndGame:
                     running = False
                 if event.type == pygame.MOUSEBUTTONUP:
                     sounds.book_sound.play()
-                    if cnt == 0:
-                        img = self.load_image("four.png")
-                        img = pygame.transform.scale(img, (1200, 800))
-                    elif cnt == 1:
-                        img = self.load_image("end.png")
-                        img = pygame.transform.scale(img, (1200, 800))
-                    elif cnt == 2:
+                    if n >= len(imgs) - 1:
                         running = False
-                    cnt += 1
+                        break
+                    n+=1
+                    img = pygame.transform.scale(self.load_image(imgs[n]), (1200, 800))
+                    
                     
             self.screen.blit(img, (0, 0))
             
@@ -50,6 +45,3 @@ class EndGame:
             
 
             pygame.display.flip()
-
-# if __name__ == "__main__":   
-#     EndGame().start() 
