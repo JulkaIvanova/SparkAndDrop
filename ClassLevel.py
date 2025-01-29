@@ -147,20 +147,24 @@ class Level:
         # Задержка перед завершением
         pygame.time.wait(1500)
 
-    def show_win_screen(self, time):
+    def show_win_screen(self, time, G):
         """Показ окна победы."""
         self.screen.fill((0, 128, 0))  # Зелёный фон
         self.display_message("Победа!", (255, 255, 255))
-        self.show_resalt_screen(time)
+        self.show_resalt_screen(time, G)
         # self.display_message("Результаты:", (255, 255, 255))
 
-    def show_resalt_screen(self, time):
+    def show_resalt_screen(self, time, G):
         """Показ окна результатов."""
         self.screen.fill((169, 69, 69))
         #self.display_message("Победа!", (255, 255, 255))
         self.display_message("Результаты:", (255, 255, 255), (600, 200))
         self.display_message(f"Собрано монет: {self.coinsCollect.cnt}/{self.coins}", (255, 255, 255), (600, 300))
         self.display_message(f"Времени затрачено: {time} сек", (255, 255, 255), (600, 400))
+        res = sqlite_start.get_level_info(G)
+        print("yyyyyyyyy", res)
+        self.display_message(f"Рекордное время: {int(res[0])} сек", (255, 255, 255), (600, 500))
+        self.display_message(f"Наибольшее количество монет: {res[1]}/{self.coins}", (255, 255, 255), (600, 600))
 
     def show_lose_screen(self):
         """Показ окна поражения."""
@@ -201,9 +205,10 @@ class LevelOne(Level):
             
             #Проверка условий победы
             if self.doors[0].near_door and self.doors[1].near_door:
-                print(sqlite_start.update_user_progress(1))
+                time = (pygame.time.get_ticks()-self.time)//1000
+                print(sqlite_start.update_user_progress(1, self.coinsCollect.cnt, time))
                 sounds.win_sound.play()
-                self.show_win_screen((pygame.time.get_ticks()-self.time)//1000)
+                self.show_win_screen(time, 1)
                 self.running = False
                 break
 
@@ -219,7 +224,7 @@ class LevelOne(Level):
             for i in self.gorizontaldoors:
                 i.check(self.levelMap)
             self.verticaldoors[0].check(self.levelMap)
-            self.time = self.clock.tick(commonConsts.FPS)
+            self.clock.tick(commonConsts.FPS)
             pygame.display.flip()
 
 
@@ -257,11 +262,10 @@ class LevelTwo(Level):
 
             #Проверка условий победы
             if self.doors[0].near_door and self.doors[1].near_door:
-                print(sqlite_start.update_user_progress(2))
-                # time = self.clock.tick()/1000
+                time = (pygame.time.get_ticks()-self.time)//1000
+                print(sqlite_start.update_user_progress(2, self.coinsCollect.cnt, time))
                 sounds.win_sound.play()
-                # self.show_win_screen(pygame.time.Clock.get_time(self.clock))
-                self.show_win_screen((pygame.time.get_ticks()-self.time)//1000)
+                self.show_win_screen(time, 2)
                 self.running = False
                 break
 
@@ -320,9 +324,10 @@ class LevelThree(Level):
             
             #Проверка условий победы
             if self.doors[0].near_door and self.doors[1].near_door:
-                print(sqlite_start.update_user_progress(3))
+                time = (pygame.time.get_ticks()-self.time)//1000
+                print(sqlite_start.update_user_progress(3, self.coinsCollect.cnt, time))
                 sounds.win_sound.play()
-                self.show_win_screen((pygame.time.get_ticks()-self.time)//1000)
+                self.show_win_screen(time, 3)
                 self.running = False
                 break
 
@@ -401,9 +406,10 @@ class LevelFour(Level):
             
             #Проверка условий победы
             if self.doors[0].near_door and self.doors[1].near_door:
-                print(sqlite_start.update_user_progress(4))
+                time = (pygame.time.get_ticks()-self.time)//1000
+                print(sqlite_start.update_user_progress(4, self.coinsCollect.cnt, time))
                 sounds.win_sound.play()
-                self.show_win_screen((pygame.time.get_ticks()-self.time)//1000)
+                self.show_win_screen(time, 4)
                 self.running = False
                 break
 
@@ -422,7 +428,7 @@ class LevelFour(Level):
                 i.check(self.levelMap)
             for i in self.verticaldoors:
                 i.check(self.levelMap)
-            self.time = self.clock.tick(commonConsts.FPS)
+            self.clock.tick(commonConsts.FPS)
             pygame.display.flip()
 
 def load_image(name, colorkey=None):

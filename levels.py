@@ -4,6 +4,7 @@ import sys
 import ClassLevel
 import sounds
 import endGame
+import sqlite_start
 
 class Board:
     # создание поля
@@ -92,7 +93,9 @@ class Levels:
                         print("1")
                     elif self.board.coordinates(event.pos) in [(18, 4), (19, 4), (20, 4), (21, 4), (18, 5), (19, 5), (20, 5), (21, 5), (18, 6), (19, 6), (20, 6), (21, 6), (18, 7), (19, 7), (20, 7), (21, 7)]:
                         sounds.choose_sound.play()
-                        if self.level is not None and self.level.running:
+                        # if self.level is not None and self.level.running:
+                        #     continue
+                        if not sqlite_start.check_level_completion(1):
                             continue
                         with open("data\level_2.txt") as f:
                             level = f.read()   
@@ -100,16 +103,22 @@ class Levels:
                         print("2")
                     elif self.board.coordinates(event.pos) in [(18, 11), (19, 11), (20, 11), (21, 11), (18, 12), (19, 12), (20, 12), (21, 12), (18, 13), (19, 13), (20, 13), (21, 13), (18, 14), (19, 14), (20, 14), (21, 14)]:
                         sounds.choose_sound.play()
+                        if not sqlite_start.check_level_completion(2):
+                            continue
                         with open("data\level_3.txt") as f:
                             level = f.read()   
                         self.level = ClassLevel.LevelThree(levelMap=level.split("\n"), background=load_image("background_lvl_3.jpg")).paint()
                         print("3")
                     elif self.board.coordinates(event.pos) in [(8, 11), (9, 11), (10, 11), (11, 11), (8, 12), (9, 12), (10, 12), (11, 12), (8, 13), (9, 13), (10, 13), (11, 13), (8, 14), (9, 14), (10, 14), (11, 14)]:
                         sounds.choose_sound.play()
+                        if not sqlite_start.check_level_completion(3):
+                            continue
                         with open("data\level_4.txt") as f:
                             level = f.read()   
                         self.level = ClassLevel.LevelFour(levelMap=level.split("\n"), background=load_image("background_lvl_4.jpg")).paint()
                         print("4")
+                        if not sqlite_start.check_level_completion(4):
+                            continue
                         endGame.EndGame().start()
                     elif self.board.coordinates(event.pos) in [(13, 16), (13, 17), (14, 16), (14, 17), (15, 16), (15, 17), (16, 16), (16, 17)]:
                         sounds.choose_sound.play()

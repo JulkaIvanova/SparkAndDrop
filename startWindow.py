@@ -2,6 +2,7 @@ import pygame
 import begingGame
 import sounds
 import ruls
+import sqlite_start
 
 class Board:
     # создание поля
@@ -65,6 +66,8 @@ def load_image(name, colorkey=None):
 
 
 if __name__ == "__main__":
+    # sqlite_start.create_database()
+
     running = True
     flag = False
     pos = (0, 0)

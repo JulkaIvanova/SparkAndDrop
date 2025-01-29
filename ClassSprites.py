@@ -126,7 +126,7 @@ class Button(spritesBase.GameSprite):
                 if self.check_sprite_inside(i):
                     self.box = i
         if args and ((pygame.sprite.collide_mask(self, mag) and pygame.key.get_pressed()[pygame.K_q]) or (
-                pygame.sprite.collide_mask(self, robber) and pygame.key.get_pressed()[pygame.K_u])) or self.box:
+                pygame.sprite.collide_mask(self, robber) and pygame.key.get_pressed()[pygame.K_RCTRL])) or self.box:
             self.activate = True
         else:
             self.activate = False
@@ -145,7 +145,7 @@ class Lever(spritesBase.GameSprite):
         event = args[0]  # Считаем, что передается событие
         if event is not None and event.type == pygame.KEYDOWN:  # Проверяем, что это событие нажатия клавиши
             if ((self.check_sprite_inside(mag) and event.key == pygame.K_q) or
-                    (self.check_sprite_inside(robber) and event.key == pygame.K_u)):
+                    (self.check_sprite_inside(robber) and event.key == pygame.K_RCTRL)):
                 sounds.choose_sound.play()
                 self.activate = not self.activate
 
