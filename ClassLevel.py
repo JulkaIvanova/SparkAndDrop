@@ -4,6 +4,7 @@ import os
 import sys
 import commonConsts
 import sounds
+import sqlite_start
 
 
 
@@ -200,6 +201,7 @@ class LevelOne(Level):
             
             #Проверка условий победы
             if self.doors[0].near_door and self.doors[1].near_door:
+                print(sqlite_start.update_user_progress(1))
                 sounds.win_sound.play()
                 self.show_win_screen((pygame.time.get_ticks()-self.time)//1000)
                 self.running = False
@@ -255,6 +257,7 @@ class LevelTwo(Level):
 
             #Проверка условий победы
             if self.doors[0].near_door and self.doors[1].near_door:
+                print(sqlite_start.update_user_progress(2))
                 # time = self.clock.tick()/1000
                 sounds.win_sound.play()
                 # self.show_win_screen(pygame.time.Clock.get_time(self.clock))
@@ -317,6 +320,7 @@ class LevelThree(Level):
             
             #Проверка условий победы
             if self.doors[0].near_door and self.doors[1].near_door:
+                print(sqlite_start.update_user_progress(3))
                 sounds.win_sound.play()
                 self.show_win_screen((pygame.time.get_ticks()-self.time)//1000)
                 self.running = False
@@ -397,6 +401,7 @@ class LevelFour(Level):
             
             #Проверка условий победы
             if self.doors[0].near_door and self.doors[1].near_door:
+                print(sqlite_start.update_user_progress(4))
                 sounds.win_sound.play()
                 self.show_win_screen((pygame.time.get_ticks()-self.time)//1000)
                 self.running = False
