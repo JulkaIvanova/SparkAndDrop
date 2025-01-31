@@ -26,7 +26,8 @@ class EndGame:
         running = True
         flag = False
         pos = (0, 0)
-        pygame.display.set_caption("Свой курсор мыши")
+        pygame.display.set_caption("Самое ценное сокровище")
+        # pygame.display.set_icon(self.load_image("icon.png"))
         while running:
             self.screen.fill((0, 0, 0))
             for event in pygame.event.get():

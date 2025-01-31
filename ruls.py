@@ -24,7 +24,8 @@ class Ruls:
         n = 0
         img = pygame.transform.scale(self.load_image(imgs[n]), (1200, 800))
         running = True
-        pygame.display.set_caption("Свой курсор мыши")
+        pygame.display.set_caption("Самое ценное сокровище")
+        pygame.display.set_icon(self.load_image("icon.png"))
         while running:
             self.screen.fill((0, 0, 0))
             for event in pygame.event.get():

@@ -2,6 +2,7 @@ import pygame
 import ClassSprites
 import os
 import sys
+from boxService import BoxService
 import commonConsts
 import sounds
 import sqlite_start
@@ -49,14 +50,17 @@ class Level:
         pygame.init()
         size = width, height = 1200, 800
         self.screen = pygame.display.set_mode(size)
+        pygame.display.set_caption("Самое ценное сокровище")
+        pygame.display.set_icon(load_image("icon.png"))
 
     def initialization(self):
+        box_service = BoxService(self.levelMap)
         for i in range(len(self.levelMap)):
             for j in range(len(self.levelMap[i])):
                 if self.levelMap[i][j] == "@":
-                    self.robber = ClassSprites.Robber(self.all_sprites_robber, x = j*40, y = i*40, levelMap=self.levelMap)
+                    self.robber = ClassSprites.Robber(self.all_sprites_robber, x = j*40, y = i*40, levelMap=self.levelMap, box_service=box_service)
                 elif self.levelMap[i][j] == "$":
-                    self.mag = ClassSprites.Mag(self.all_sprites_mag, x = j*40, y = i*40, levelMap=self.levelMap)
+                    self.mag = ClassSprites.Mag(self.all_sprites_mag, x = j*40, y = i*40, levelMap=self.levelMap, box_service=box_service)
         for i in range(len(self.levelMap)):
             for j in range(len(self.levelMap[i])):
                 if self.levelMap[i][j] == "#":
@@ -77,9 +81,9 @@ class Level:
                 elif self.levelMap[i][j] == "|":
                     self.verticaldoors.append(ClassSprites.VerticalDoor(self.all_sprites_verticaldoors, x = j*40, y = i*40))
                 elif self.levelMap[i][j] == "X":
-                    self.monsterss.append(ClassSprites.Monsters(self.all_monsterss, x = j*40, y = i*40, levelMap=self.levelMap, mag=self.mag, robber=self.robber))
+                    self.monsterss.append(ClassSprites.Monsters(self.all_monsterss, x = j*40, y = i*40, levelMap=self.levelMap, mag=self.mag, robber=self.robber, box_service=box_service))
                 elif self.levelMap[i][j] == "B":
-                    self.boxs.append(ClassSprites.Box(self.all_sprites_box, x = j*40, y = i*40, levelMap=self.levelMap, robber=self.robber, mag=self.mag))
+                    self.boxs.append(ClassSprites.Box(self.all_sprites_box, x = j*40, y = i*40, levelMap=self.levelMap, robber=self.robber, mag=self.mag, box_service=box_service))
                 elif self.levelMap[i][j] == "S":
                     ClassSprites.Spike(self.all_sprites_spikes, x = j*40, y = i*40, levelMap=self.levelMap, robber=self.robber, mag=self.mag)
 
@@ -186,7 +190,6 @@ class LevelOne(Level):
                 cnt = f'{i}'
             self.gorizontaldoors[i].connect(cnt, self.levers[i], "lever")
         self.verticaldoors[0].connect('', self.buttons, "button", 2)
-        pygame.display.set_caption("Уровень 1")
         while self.running:
             eventt = None
             self.screen.fill((0, 0, 0))
@@ -235,7 +238,6 @@ class LevelTwo(Level):
     def paint(self):
         self.init()
         self.time = pygame.time.get_ticks()
-        pygame.display.set_caption("Уровень 2")
         self.gorizontaldoors[0].connect('2', self.buttons[0], "button")
         self.gorizontaldoors[1].connect('1', self.buttons[2], "button")
         self.verticaldoors[0].connect('', self.buttons[1], "button")
@@ -272,10 +274,6 @@ class LevelTwo(Level):
             # Основной цикл отрисовки и обновления объектов
             self.bild(self.screen)
             self.all_sprites_mag.update(eventt)
-            self.robber.find_box(self.boxs)
-            self.mag.find_box(self.boxs)
-            for i in self.monsterss:
-                i.find_box(self.boxs)
             self.all_sprites_robber.update(eventt)
             self.all_monsterss.update(eventt)
             self.all_sprites_coins.update(eventt, mag=self.mag, robber=self.robber, coinsCollect=self.coinsCollect)
@@ -299,7 +297,6 @@ class LevelThree(Level):
 
     def paint(self):
         self.init()
-        pygame.display.set_caption("Уровень 3")
         self.time = pygame.time.get_ticks()
         self.verticaldoors[0].connect('5', self.levers[0], "lever")
         self.gorizontaldoors[0].connect('2', self.levers[1], "lever")
@@ -356,7 +353,6 @@ class LevelFour(Level):
 
     def paint(self):
         self.init()
-        pygame.display.set_caption("Уровень 4")
         self.time = pygame.time.get_ticks()
 
         self.gorizontaldoors[0].connect('1', self.buttons[1], "button")
