@@ -35,14 +35,15 @@ class BoxService:
 
         if box_on_distance is None:
             return distance
-        
+
         if right_direction:
             sprite_box_distance = box_on_distance.rect.left - currentSprite.rect.left - currentSprite.rect.width
         else:
             sprite_box_distance = currentSprite.rect.left - box_on_distance.rect.left - box_on_distance.rect.width
         
-        box_on_distance.set_direction(right_direction)
-        box_on_distance.move(can_fall=can_fall, distance=distance-sprite_box_distance)
+        if currentSprite.strongth:
+            box_on_distance.set_direction(right_direction)
+            box_on_distance.move(can_fall=can_fall, distance=distance-sprite_box_distance)
 
         if right_direction:
             return box_on_distance.rect.left - currentSprite.rect.left - currentSprite.rect.width

@@ -355,7 +355,7 @@ class Robber(spritesBase.MovableGameSprite):
     image = load_image("rober_right.png")
 
     def __init__(self, *group, x, y, levelMap, box_service):
-        super().__init__(Robber.image, x, y, *group, width=40, height=80, level_map=levelMap, hspeed=240, box_service=box_service)
+        super().__init__(Robber.image, x, y, *group, width=40, height=80, level_map=levelMap, hspeed=240, box_service=box_service, strongth=True)
         self.alive = True
         self.box = None
         self.add_animation([3])

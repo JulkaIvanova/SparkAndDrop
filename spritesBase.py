@@ -115,7 +115,7 @@ class AnimatedSprite(GameSprite):
             self.cur_frame+=1 
 
 class  MovableGameSprite(AnimatedSprite):
-    def __init__(self, image: pygame.Surface, x: int, y: int, *group, level_map, box_service: BoxService, width=0, height=0, hspeed=0, vspeed=800, jump_height=3*commonConsts.BLOCK_SIZE, right_direction = False):
+    def __init__(self, image: pygame.Surface, x: int, y: int, *group, level_map, box_service: BoxService, width=0, height=0, hspeed=0, vspeed=800, jump_height=3*commonConsts.BLOCK_SIZE, right_direction = False, strongth=False):
         super().__init__(image, x, y, *group, width= width, height=height)
         self.hspeed = hspeed
         self.vspeed = vspeed
@@ -126,6 +126,7 @@ class  MovableGameSprite(AnimatedSprite):
         self.set_direction(right_direction)
         self.box_service = box_service
         self.was_stay = True
+        self.strongth = strongth
 
     def change_direction(self):
         self.set_direction(not self.right_direction)
@@ -293,8 +294,8 @@ class  MovableGameSprite(AnimatedSprite):
                 else:
                     distance = last_success_left * commonConsts.BLOCK_SIZE - self.rect.left
                     #self.set_left_cell_x(last_success_left)
-                if flip_on_stop:
-                    self.change_direction()
+                #if flip_on_stop:
+                #    self.change_direction()
                 break
             if not self.can_stay(self.level_map[self.get_bottom_cell_y()+1][block_front]):
                 if not can_fall:
@@ -305,9 +306,9 @@ class  MovableGameSprite(AnimatedSprite):
                     else:
                         distance = last_success_left * commonConsts.BLOCK_SIZE - self.rect.left
                         #self.set_left_cell_x(last_success_left)
-                    if flip_on_stop:
-                        self.change_direction()
-                        break
+                    #if flip_on_stop:
+                    #    self.change_direction()
+                    #    break
                 else:
                     if not self.can_stay(self.level_map[self.get_bottom_cell_y()+1][block_back]):
                         #full_distance = False
@@ -319,7 +320,7 @@ class  MovableGameSprite(AnimatedSprite):
                         #break
             last_success_right = right
             last_success_left = left
-
+    
         distance = self.box_service.moveBoxes(self, distance=distance, right_direction=self.right_direction)
         if distance <= 0:
             if flip_on_stop:
