@@ -360,6 +360,8 @@ class Mag(spritesBase.MovableGameSprite):
         super().__init__(Mag.image, x, y, *group, width=40, height=40, level_map=levelMap, hspeed=240, jump_height=4*commonConsts.BLOCK_SIZE)
         self.add_animation([0])
         self.add_animation([0, 1, 2, 3])
+        self.add_animation([4, 5, 6, 7, 8, 9, 10, 11])
+        self.add_animation([8, 9, 10, 11])
         self.alive = True
         self.box = None
 
@@ -403,6 +405,12 @@ class Mag(spritesBase.MovableGameSprite):
     
     def get_move_animation(self) -> int:
         return 1
+    
+    def get_jump_animation(self):
+        return 2
+    
+    def get_fall_animation(self):
+        return 3
 
     def do_update(self, *args):
         if args and pygame.key.get_pressed()[pygame.K_d]:
