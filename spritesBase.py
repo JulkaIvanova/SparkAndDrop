@@ -1,4 +1,5 @@
 import pygame
+from boxService import BoxService
 import commonConsts
 
 
@@ -114,7 +115,7 @@ class AnimatedSprite(GameSprite):
             self.cur_frame+=1 
 
 class  MovableGameSprite(AnimatedSprite):
-    def __init__(self, image: pygame.Surface, x: int, y: int, *group, level_map, width=0, height=0, hspeed=0, vspeed=800, jump_height=3*commonConsts.BLOCK_SIZE, right_direction = False):
+    def __init__(self, image: pygame.Surface, x: int, y: int, *group, level_map, box_service: BoxService, width=0, height=0, hspeed=0, vspeed=800, jump_height=3*commonConsts.BLOCK_SIZE, right_direction = False):
         super().__init__(image, x, y, *group, width= width, height=height)
         self.hspeed = hspeed
         self.vspeed = vspeed
@@ -123,6 +124,7 @@ class  MovableGameSprite(AnimatedSprite):
         self.current_jump_height = 0
         self.jump_in_progress = False
         self.set_direction(right_direction)
+        self.box_service = box_service
         self.was_stay = True
 
     def change_direction(self):
@@ -159,33 +161,37 @@ class  MovableGameSprite(AnimatedSprite):
     def can_jump_through(self, block_content):
         return not self.can_stay(block_content)
     
-    def fall(self, colide_with_box=None):
+    def fall(self):
         if self.jump_in_progress:
             return
         
         distance = self.vspeed / commonConsts.FPS
         offset = 0
-        if self.can_stay(self.level_map[self.get_bottom_cell_y(1)][self.get_left_cell_x()]) or self.can_stay(self.level_map[self.get_bottom_cell_y(1)][self.get_right_cell_x()]) or colide_with_box=="left":
+        if self.can_stay(self.level_map[self.get_bottom_cell_y(1)][self.get_left_cell_x()]) or self.can_stay(self.level_map[self.get_bottom_cell_y(1)][self.get_right_cell_x()]):
             return
         
         self.play_animation(self.get_fall_animation())
         self.was_stay = False
 
-        full_distance = True
+        #full_distance = True
         blocks = 0
         while offset<distance:
             offset+=commonConsts.BLOCK_SIZE
             if offset>distance:
                 offset = distance
-            if self.can_stay(self.level_map[self.get_bottom_cell_y(offset)][self.get_left_cell_x()]) or self.can_stay(self.level_map[self.get_bottom_cell_y(offset)][self.get_right_cell_x()]) or colide_with_box=="left":
-                full_distance = False
-                print('s')
+            if self.can_stay(self.level_map[self.get_bottom_cell_y(offset)][self.get_left_cell_x()]) or \
+               self.can_stay(self.level_map[self.get_bottom_cell_y(offset)][self.get_right_cell_x()]):
+                distance = (self.get_bottom_cell_y(1)+blocks + 1) * commonConsts.BLOCK_SIZE - self.rect.bottom
                 break
             blocks+=1
-        if full_distance:
-            self.rect.top += distance
-        else:
-            self.set_bottom_cell_y(self.get_bottom_cell_y(1)+blocks)
+
+        distance = self.box_service.fallThroughBoxes(self, distance)
+        self.rect.top += distance
+
+        # if full_distance:
+        #     self.rect.top += distance
+        # else:
+        #     self.set_bottom_cell_y(self.get_bottom_cell_y(1)+blocks)
 
     def _process_jump(self):
         if not self.jump_in_progress:
@@ -228,20 +234,22 @@ class  MovableGameSprite(AnimatedSprite):
             self.jump_in_progress = False
             self.current_jump_height = 0
 
-    def do_update(self):
+    def do_update(self, *args):
         pass
 
-    def jump(self, colide_with_box=None):
+    def jump(self):
         if self.jump_in_progress:
             return
 
-        if not self.can_stay(self.level_map[self.get_bottom_cell_y(1)][self.get_left_cell_x()]) and not self.can_stay(self.level_map[self.get_bottom_cell_y(1)][self.get_right_cell_x()]) and not colide_with_box == "left":
+        if not self.can_stay(self.level_map[self.get_bottom_cell_y(1)][self.get_left_cell_x()]) and \
+           not self.can_stay(self.level_map[self.get_bottom_cell_y(1)][self.get_right_cell_x()]) and \
+           not self.box_service.stay_on_box(self) :
             return
 
         self.jump_in_progress = True
         self._process_jump()
 
-    def move(self, can_fall = True, flip_on_stop = False, distance = 0, colide_with_box=None):
+    def move(self, can_fall = True, flip_on_stop = False, distance = 0):
         if distance == 0:
             distance = self.hspeed // commonConsts.FPS  # При таком подходе скорость спрайта должна быть кратна fps, иначе она будет урезаться
         if distance == 0:
@@ -254,7 +262,7 @@ class  MovableGameSprite(AnimatedSprite):
         full_distance = True
         offset=0
         last_success_right = self.get_right_cell_x()
-        last_success_left = self.get_right_cell_x()
+        last_success_left = self.get_left_cell_x()
         while offset<distance:
             
             offset+=commonConsts.BLOCK_SIZE
@@ -267,8 +275,8 @@ class  MovableGameSprite(AnimatedSprite):
                 right = self.get_right_cell_x(-offset)
                 left = self.get_left_cell_x(-offset)
             # Если блок в котором находится спрайт не изменится, то проверки не нужны
-            if right == self.get_right_cell_x() and left == self.get_left_cell_x():
-                continue
+            #if right == self.get_right_cell_x() and left == self.get_left_cell_x():
+            #    continue
 
             if self.right_direction:
                 block_front = right
@@ -277,12 +285,13 @@ class  MovableGameSprite(AnimatedSprite):
                 block_back = right
                 block_front = left
 
-            if not self.can_move(self.level_map[self.get_bottom_cell_y()][block_front]) or not self.can_move(self.level_map[self.get_top_cell_y()][block_front]) or colide_with_box == 'left':
-                full_distance = False
+            if not self.can_move(self.level_map[self.get_bottom_cell_y()][block_front]) or not self.can_move(self.level_map[self.get_top_cell_y()][block_front]):
                 if self.right_direction:
-                    self.set_right_cell_x(last_success_right)
+                    distance = (last_success_right + 1) * commonConsts.BLOCK_SIZE - self.rect.width - self.rect.left
+                    #self.set_right_cell_x(last_success_right)
                 else:
-                    self.set_left_cell_x(last_success_left)
+                    distance = last_success_left * commonConsts.BLOCK_SIZE - self.rect.left
+                    #self.set_left_cell_x(last_success_left)
                 if flip_on_stop:
                     self.change_direction()
                 break
@@ -290,9 +299,11 @@ class  MovableGameSprite(AnimatedSprite):
                 if not can_fall:
                     full_distance = False
                     if self.right_direction:
-                        self.set_right_cell_x(last_success_right)
+                        distance = (last_success_right + 1) * commonConsts.BLOCK_SIZE - self.rect.width - self.rect.left
+                        #self.set_right_cell_x(last_success_right)
                     else:
-                        self.set_left_cell_x(last_success_left)
+                        distance = last_success_left * commonConsts.BLOCK_SIZE - self.rect.left
+                        #self.set_left_cell_x(last_success_left)
                     if flip_on_stop:
                         self.change_direction()
                         break
@@ -308,11 +319,15 @@ class  MovableGameSprite(AnimatedSprite):
             last_success_right = right
             last_success_left = left
 
-        if full_distance:
-            if self.right_direction:
-                self.rect.left = self.rect.left + distance
-            else:
-                self.rect.left = self.rect.left - distance
+        distance = self.box_service.moveBoxes(self, distance=distance, right_direction=self.right_direction)
+        if distance <= 0:
+            if flip_on_stop:
+                self.change_direction()
+
+        if self.right_direction:
+            self.rect.left = self.rect.left + distance
+        else:
+            self.rect.left = self.rect.left - distance
 
     
     def update(self, *args):
