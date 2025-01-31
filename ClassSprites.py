@@ -84,8 +84,9 @@ class MagicDoor(spritesBase.GameSprite):
         # self.open = False
 
     def update(self, *args, mag: spritesBase.GameSprite, levelMap):
-        if levelMap[int(mag.get_top_cell_y())][int(mag.get_left_cell_x()) - 1] == "I" or \
-                levelMap[int(mag.get_top_cell_y())][int(mag.get_left_cell_x()) + 1] == "I":
+        # if levelMap[int(mag.get_top_cell_y())][int(mag.get_left_cell_x()) - 1] == "I" or \
+        #         levelMap[int(mag.get_top_cell_y())][int(mag.get_left_cell_x()) + 1] == "I":
+        if self.rect.left == mag.rect.right or self.rect.right == mag.rect.left:
             if args and pygame.key.get_pressed()[pygame.K_e]:
                 levelMap[int(self.rect.y // 40)] = levelMap[int(self.rect.y // 40)][:int(self.rect.x // 40)] + "." + \
                                                    levelMap[int(self.rect.y // 40)][int(self.rect.x // 40) + 1:]
@@ -314,9 +315,11 @@ class Mag(spritesBase.MovableGameSprite):
         super().__init__(Mag.image, x, y, *group, width=40, height=40, level_map=levelMap, hspeed=240, jump_height=4*commonConsts.BLOCK_SIZE, box_service=box_service)
         self.add_animation([0])
         self.add_animation([0, 1, 2, 3])
+        self.add_animation([4, 5, 6, 7, 8, 9, 10, 11])
+        self.add_animation([8, 9, 10, 11])
         self.alive = True
         self.box = None
-        self.box_service.addBox(self)
+        # self.box_service.addBox(self)
 
     def can_move(self, block_content):
         return block_content in [".", "$", "@", "X", "7", "*", "0", "T", "S", "B"]
@@ -330,6 +333,12 @@ class Mag(spritesBase.MovableGameSprite):
     
     def get_move_animation(self) -> int:
         return 1
+    
+    def get_jump_animation(self):
+        return 2
+    
+    def get_fall_animation(self):
+        return 3
 
     def do_update(self, *args):
         if args and pygame.key.get_pressed()[pygame.K_d]:
@@ -351,7 +360,7 @@ class Robber(spritesBase.MovableGameSprite):
         self.box = None
         self.add_animation([3])
         self.add_animation([0, 1, 2])
-        self.box_service.addBox(self)
+        # self.box_service.addBox(self)
 
     def can_move(self, block_content):
         return block_content in [".", "$", "@", "X", "7", "*", "0", "T", "S", "B"]
@@ -365,6 +374,7 @@ class Robber(spritesBase.MovableGameSprite):
     
     def get_move_animation(self) -> int:
         return 1
+    
         
 
     def do_update(self, *args):

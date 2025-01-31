@@ -275,8 +275,8 @@ class  MovableGameSprite(AnimatedSprite):
                 right = self.get_right_cell_x(-offset)
                 left = self.get_left_cell_x(-offset)
             # Если блок в котором находится спрайт не изменится, то проверки не нужны
-            #if right == self.get_right_cell_x() and left == self.get_left_cell_x():
-            #    continue
+            if right == self.get_right_cell_x() and left == self.get_left_cell_x():
+               continue
 
             if self.right_direction:
                 block_front = right
@@ -286,6 +286,7 @@ class  MovableGameSprite(AnimatedSprite):
                 block_front = left
 
             if not self.can_move(self.level_map[self.get_bottom_cell_y()][block_front]) or not self.can_move(self.level_map[self.get_top_cell_y()][block_front]):
+                full_distance = False
                 if self.right_direction:
                     distance = (last_success_right + 1) * commonConsts.BLOCK_SIZE - self.rect.width - self.rect.left
                     #self.set_right_cell_x(last_success_right)
