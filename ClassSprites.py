@@ -84,11 +84,9 @@ class MagicDoor(spritesBase.GameSprite):
         # self.open = False
 
     def update(self, *args, mag: spritesBase.GameSprite, levelMap):
-        # if levelMap[int(mag.get_top_cell_y())][int(mag.get_left_cell_x()) - 1] == "I" or \
-        #         levelMap[int(mag.get_top_cell_y())][int(mag.get_left_cell_x()) + 1] == "I":
-        if self.rect.left == mag.rect.right or mag.rect.left == self.rect.right:
+        if levelMap[int(mag.get_top_cell_y())][int(mag.get_left_cell_x()) - 1] == "I" or \
+                levelMap[int(mag.get_top_cell_y())][int(mag.get_left_cell_x()) + 1] == "I":
             if args and pygame.key.get_pressed()[pygame.K_e]:
-                print("Y")
                 levelMap[int(self.rect.y // 40)] = levelMap[int(self.rect.y // 40)][:int(self.rect.x // 40)] + "." + \
                                                    levelMap[int(self.rect.y // 40)][int(self.rect.x // 40) + 1:]
                 levelMap[int(self.rect.y // 40) + 1] = levelMap[int(self.rect.y // 40) + 1][
@@ -214,8 +212,7 @@ class Box(spritesBase.MovableGameSprite):
         self.mag = mag
         self.levelMap = levelMap
         self.ceracter_near = False
-
-
+        self.direction = None
     def can_move(self, block_content):
         return block_content in ".@$7XB0*"
 
@@ -284,12 +281,10 @@ class VerticalDoor(spritesBase.GameSprite):
 class Monsters(spritesBase.MovableGameSprite):
     image = load_image("monster.png")
 
-    def __init__(self, *group, x, y, levelMap, mag, robber):
-        super().__init__(Monsters.image, x, y, *group, width=40, height=40, level_map=levelMap, hspeed=120)
+    def __init__(self, *group, x, y, levelMap, mag, robber, box_service):
+        super().__init__(Monsters.image, x, y, *group, width=40, height=40, level_map=levelMap, hspeed=120, box_service=box_service)
         self.mag = mag
         self.robber = robber
-        self.box = None
-        self.colide = None
 
     def can_move(self, block_content):
         return block_content in ".@$7XB"
@@ -297,35 +292,12 @@ class Monsters(spritesBase.MovableGameSprite):
     def can_stay(self, block_content):
         return block_content in "#-"
     
-    def find_box(self, boxes):
-        self.box = None
-        for i in boxes:
-            if pygame.sprite.collide_mask(self, i):
-                self.box = i
-                self.box.ceracter_near = True
-
-    def chek_colide_with_box_right(self, box, *args):
-        if box is None:
-            return
-        if box.rect.left - 10 <= self.rect.right <= box.rect.left + 10:
-            return 'left'
-        # print(box.rect.left, self.rect.right)
-    
-    # def chek_colide_with_box_left(self, box, *args):
-    #     if box is None:
-    #         return
-    #     if box.rect.right - 10 <= self.rect.left <= box.rect.right + 10:
-    #         return 'left'
 
     def do_update(self, *args):
         if pygame.sprite.collide_mask(self, self.mag):
             sounds.fight_sound.play()
             self.mag.alive = False
-        # if self.chek_colide_with_box_right(self.box, *args):
-        #     self.colide = self.chek_colide_with_box_right(self.box, *args)
-        # elif self.chek_colide_with_box_left(self.box, *args):
-        #     self.colide = self.chek_colide_with_box_left(self.box, *args)
-        self.move(False, True, colide_with_box=self.colide)
+        self.move(False, True)
         if pygame.sprite.collide_mask(self, self.robber):
             if args and pygame.key.get_pressed()[pygame.K_DOWN]:
                 sounds.fight_sound.play()
@@ -342,8 +314,6 @@ class Mag(spritesBase.MovableGameSprite):
         super().__init__(Mag.image, x, y, *group, width=40, height=40, level_map=levelMap, hspeed=240, jump_height=4*commonConsts.BLOCK_SIZE, box_service=box_service)
         self.add_animation([0])
         self.add_animation([0, 1, 2, 3])
-        self.add_animation([4, 5, 6, 7, 8, 9, 10, 11])
-        self.add_animation([8, 9, 10, 11])
         self.alive = True
         self.box = None
         self.box_service.addBox(self)
@@ -353,64 +323,23 @@ class Mag(spritesBase.MovableGameSprite):
 
     def can_stay(self, block_content):
         return not (block_content in [".", "$", "@", "X", "7", "*", "0", "T", "S", "B"])
-
-    def find_box(self, boxes):
-        if self.box != None:
-            self.box.direction = False
-            self.box.ceracter_near = False
-        self.box = None
-        for i in boxes:
-            if pygame.sprite.collide_mask(self, i):
-                self.box = i
-                self.box.ceracter_near = True
-
-    def chek_colide_with_box_right(self, box, *args):
-        if box is None:
-            return
-        if box.rect.left - 10 <= self.rect.right <= box.rect.left + 10:
-            return 'left'
-        
-    
-    def chek_colide_with_box_left(self, box, *args):
-        if box is None:
-            return
-        if box.rect.right - 10 <= self.rect.left <= box.rect.right + 10:
-            return 'left'
-    
-    def chek_colide_with_box_top(self, box, *args):
-        if box is None:
-            return
-        if box.rect.top <= self.rect.bottom <= box.rect.top + 10:
-            return 'left'
+   
         
     def get_stay_animation(self) -> int:
         return 0
     
     def get_move_animation(self) -> int:
         return 1
-    
-    def get_jump_animation(self):
-        return 2
-    
-    def get_fall_animation(self):
-        return 3
 
     def do_update(self, *args):
         if args and pygame.key.get_pressed()[pygame.K_d]:
-            if self.chek_colide_with_box_right(self.box, *args) != 'left':
-                self.set_direction(True)
-                self.move()
+            self.set_direction(True)
+            self.move()
         if args and pygame.key.get_pressed()[pygame.K_a]:
-            if self.chek_colide_with_box_left(self.box, *args) != 'left':
-                self.set_direction(False)
-                self.move()
+            self.set_direction(False)
+            self.move()
         if args and pygame.key.get_pressed()[pygame.K_w]:
-            self.jump(self.chek_colide_with_box_top(self.box, *args))
-    
-    #def update(self, *args):
-    #    self.fall(self.chek_colide_with_box_top(self.box, *args))
-    #    self._process_jump()
-    #    self.do_update(*args)
+            self.jump()
 
 
 class Robber(spritesBase.MovableGameSprite):
@@ -430,66 +359,20 @@ class Robber(spritesBase.MovableGameSprite):
     def can_stay(self, block_content):
         return not (block_content in [".", "$", "@", "X", "7", "*", "0", "T", "S", "B"])
     
-    def find_box(self, boxes):
-        if self.box != None:
-            self.box.direction = False
-            self.box.ceracter_near = False
-        self.box = None
-        for i in boxes:
-            if pygame.sprite.collide_mask(self, i):
-                self.box = i
-                self.box.ceracter_near = True
-
-    def chek_colide_with_box_right(self, box, *args):
-        if box is None:
-            return
-        if box.rect.left - 10 <= self.rect.right <= box.rect.left + 10:
-            box.direction = 'right'
-            
-            return 'left'
-    
+        
     def get_stay_animation(self) -> int:
         return 0
     
     def get_move_animation(self) -> int:
         return 1
         
-    def chek_colide_with_box_left(self, box, *args):
-        if box is None:
-            # box.ceracter_near = False
-            # box.direction = None
-            return
-        if box.rect.right - 10 <= self.rect.left <= box.rect.right + 10:
-            box.direction = 'left'
-            # box.ceracter_near = True
-            return 'left'
-    
-    def chek_colide_with_box_top(self, box, *args):
-        if box is None:
-            return
-        if box.rect.top <= self.rect.bottom <= box.rect.top + 10:
-            print(9)
-            return 'left'
-
-        
 
     def do_update(self, *args):
         if args and pygame.key.get_pressed()[pygame.K_RIGHT]:
-            if self.chek_colide_with_box_right(self.box, *args) != 'left':
-                self.set_direction(True)
-                self.move()
+            self.set_direction(True)
+            self.move()
         if args and pygame.key.get_pressed()[pygame.K_LEFT]:
-            if self.chek_colide_with_box_left(self.box, *args) != 'left':
-                self.set_direction(False)
-                self.move()
+            self.set_direction(False)
+            self.move()
         if args and pygame.key.get_pressed()[pygame.K_UP]:
-            self.jump(self.chek_colide_with_box_top(self.box, *args))
-    
-    # def update(self, *args):
-    #     self.fall(self.chek_colide_with_box_top(self.box, *args))
-    #     self._process_jump()
-    #     self.do_update(*args)
-
-    # def update(self):
-    #     if args and args[0].type == pygame.MOUSEBUTTONDOWN:
-    #         self.image = self.image_boom
+            self.jump()
