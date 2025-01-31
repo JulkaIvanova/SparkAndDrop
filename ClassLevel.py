@@ -49,6 +49,8 @@ class Level:
         pygame.init()
         size = width, height = 1200, 800
         self.screen = pygame.display.set_mode(size)
+        pygame.display.set_caption("Самое ценное сокровище")
+        pygame.display.set_icon(load_image("icon.png"))
 
     def initialization(self):
         for i in range(len(self.levelMap)):
@@ -186,7 +188,6 @@ class LevelOne(Level):
                 cnt = f'{i}'
             self.gorizontaldoors[i].connect(cnt, self.levers[i], "lever")
         self.verticaldoors[0].connect('', self.buttons, "button", 2)
-        pygame.display.set_caption("Уровень 1")
         while self.running:
             eventt = None
             self.screen.fill((0, 0, 0))
@@ -235,7 +236,6 @@ class LevelTwo(Level):
     def paint(self):
         self.init()
         self.time = pygame.time.get_ticks()
-        pygame.display.set_caption("Уровень 2")
         self.gorizontaldoors[0].connect('2', self.buttons[0], "button")
         self.gorizontaldoors[1].connect('1', self.buttons[2], "button")
         self.verticaldoors[0].connect('', self.buttons[1], "button")
@@ -299,7 +299,6 @@ class LevelThree(Level):
 
     def paint(self):
         self.init()
-        pygame.display.set_caption("Уровень 3")
         self.time = pygame.time.get_ticks()
         self.verticaldoors[0].connect('5', self.levers[0], "lever")
         self.gorizontaldoors[0].connect('2', self.levers[1], "lever")
@@ -356,7 +355,6 @@ class LevelFour(Level):
 
     def paint(self):
         self.init()
-        pygame.display.set_caption("Уровень 4")
         self.time = pygame.time.get_ticks()
 
         self.gorizontaldoors[0].connect('1', self.buttons[1], "button")

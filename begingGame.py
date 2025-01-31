@@ -22,14 +22,15 @@ class BegingGame:
     
     def start(self):
         img = self.load_image("begging.png")
-        print(1111)
+        # pygame.display.set_icon(self.load_image("icon.png"))
         sqlite_start.check_and_update_database()
         img = pygame.transform.scale(img, (1200, 800))
         cnt = 0 
         running = True
         flag = False
         pos = (0, 0)
-        pygame.display.set_caption("ЮХУУУУУУУУУУУ!")
+        pygame.display.set_caption("Самое ценное сокровище")
+        
         while running:
             self.screen.fill((0, 0, 0))
             for event in pygame.event.get():

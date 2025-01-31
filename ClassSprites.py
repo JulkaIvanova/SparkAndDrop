@@ -84,9 +84,11 @@ class MagicDoor(spritesBase.GameSprite):
         # self.open = False
 
     def update(self, *args, mag: spritesBase.GameSprite, levelMap):
-        if levelMap[int(mag.get_top_cell_y())][int(mag.get_left_cell_x()) - 1] == "I" or \
-                levelMap[int(mag.get_top_cell_y())][int(mag.get_left_cell_x()) + 1] == "I":
+        # if levelMap[int(mag.get_top_cell_y())][int(mag.get_left_cell_x()) - 1] == "I" or \
+        #         levelMap[int(mag.get_top_cell_y())][int(mag.get_left_cell_x()) + 1] == "I":
+        if self.rect.left == mag.rect.right or mag.rect.left == self.rect.right:
             if args and pygame.key.get_pressed()[pygame.K_e]:
+                print("Y")
                 levelMap[int(self.rect.y // 40)] = levelMap[int(self.rect.y // 40)][:int(self.rect.x // 40)] + "." + \
                                                    levelMap[int(self.rect.y // 40)][int(self.rect.x // 40) + 1:]
                 levelMap[int(self.rect.y // 40) + 1] = levelMap[int(self.rect.y // 40) + 1][
@@ -205,40 +207,20 @@ class GorizontalDoor(spritesBase.GameSprite):
 class Box(spritesBase.MovableGameSprite):
     image = load_image("Box.png")
 
-    def __init__(self, *group, robber, mag, x, y, levelMap):
-        super().__init__(Box.image, x, y, *group, width=40, height=40, level_map=levelMap, hspeed=240)
+    def __init__(self, *group, robber, mag, x, y, levelMap, box_service):
+        super().__init__(Box.image, x, y, *group, width=40, height=40, level_map=levelMap, hspeed=240, box_service=box_service)
+        box_service.addBox(self)
         self.robber = robber
         self.mag = mag
         self.levelMap = levelMap
         self.ceracter_near = False
-        self.direction = None
+
+
     def can_move(self, block_content):
         return block_content in ".@$7XB0*"
 
     def can_stay(self, block_content):
         return block_content in "#-"
-    
-    def chek_colide_with_ceracter_botton(self, *args):
-        if (self.mag.rect.top <= self.rect.bottom <= self.mag.rect.top + 10 or self.robber.rect.top <= self.rect.bottom <= self.robber.rect.top + 10) and self.ceracter_near:
-            print(9)
-            return 'left'
-    
-    def do_update(self, *args):
-        
-        
-        if self.ceracter_near:
-            if self.direction == "left":
-                self.set_direction(False)
-                self.move()
-            if self.direction == "right":
-                self.set_direction(True)
-                self.move()
-    
-    def update(self, *args):
-        self.fall(self.chek_colide_with_ceracter_botton(*args))
-        self._process_jump()
-        self.do_update(*args)
-
 
 class Spike(spritesBase.GameSprite):
     image = load_image("spike.png", 1)
@@ -356,12 +338,15 @@ class Monsters(spritesBase.MovableGameSprite):
 class Mag(spritesBase.MovableGameSprite):
     image = load_image("mag_right.png")
 
-    def __init__(self, *group, x, y, levelMap):
-        super().__init__(Mag.image, x, y, *group, width=40, height=40, level_map=levelMap, hspeed=240, jump_height=4*commonConsts.BLOCK_SIZE)
+    def __init__(self, *group, x, y, levelMap, box_service):
+        super().__init__(Mag.image, x, y, *group, width=40, height=40, level_map=levelMap, hspeed=240, jump_height=4*commonConsts.BLOCK_SIZE, box_service=box_service)
         self.add_animation([0])
         self.add_animation([0, 1, 2, 3])
+        self.add_animation([4, 5, 6, 7, 8, 9, 10, 11])
+        self.add_animation([8, 9, 10, 11])
         self.alive = True
         self.box = None
+        self.box_service.addBox(self)
 
     def can_move(self, block_content):
         return block_content in [".", "$", "@", "X", "7", "*", "0", "T", "S", "B"]
@@ -403,6 +388,12 @@ class Mag(spritesBase.MovableGameSprite):
     
     def get_move_animation(self) -> int:
         return 1
+    
+    def get_jump_animation(self):
+        return 2
+    
+    def get_fall_animation(self):
+        return 3
 
     def do_update(self, *args):
         if args and pygame.key.get_pressed()[pygame.K_d]:
@@ -425,12 +416,13 @@ class Mag(spritesBase.MovableGameSprite):
 class Robber(spritesBase.MovableGameSprite):
     image = load_image("rober_right.png")
 
-    def __init__(self, *group, x, y, levelMap):
-        super().__init__(Robber.image, x, y, *group, width=40, height=80, level_map=levelMap, hspeed=240)
+    def __init__(self, *group, x, y, levelMap, box_service):
+        super().__init__(Robber.image, x, y, *group, width=40, height=80, level_map=levelMap, hspeed=240, box_service=box_service)
         self.alive = True
         self.box = None
         self.add_animation([3])
         self.add_animation([0, 1, 2])
+        self.box_service.addBox(self)
 
     def can_move(self, block_content):
         return block_content in [".", "$", "@", "X", "7", "*", "0", "T", "S", "B"]

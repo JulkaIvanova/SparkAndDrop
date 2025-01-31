@@ -72,7 +72,8 @@ if __name__ == "__main__":
     flag = False
     pos = (0, 0)
     pygame.mixer.music.load('data\\background_music.mp3')
-    pygame.display.set_caption("Свой курсор мыши")
+    pygame.display.set_caption("Самое ценное сокровище")
+    pygame.display.set_icon(load_image("icon.png"))
     pygame.mixer.music.play(-1)
     pygame.mixer.music.set_volume(0.5)
     while running:
