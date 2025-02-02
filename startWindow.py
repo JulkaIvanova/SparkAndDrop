@@ -3,19 +3,20 @@ import begingGame
 import sounds
 import ruls
 import sqlite_start
+import os
+import sys
+
 
 class Board:
-    # создание поля
+
     def __init__(self, width, height):
         self.width = width
         self.height = height
         self.board = [[0] * width for _ in range(height)]
-        # значения по умолчанию
         self.left = 10
         self.top = 10
         self.cell_size = 30
 
-    # настройка внешнего вида
     def set_view(self, left, top, cell_size):
         self.left = left
         self.top = top
@@ -44,12 +45,8 @@ class Board:
         return (x, y)
 
 
-import os
-import sys
-
 board = Board(600, 600)
 board.set_view(0, 0, 40)
-
 
 pygame.init()
 size = width, height = 1200, 800
@@ -66,8 +63,6 @@ def load_image(name, colorkey=None):
 
 
 if __name__ == "__main__":
-    # sqlite_start.create_database()
-
     running = True
     flag = False
     pos = (0, 0)
@@ -82,7 +77,8 @@ if __name__ == "__main__":
             if event.type == pygame.QUIT:
                 running = False
             if event.type == pygame.MOUSEBUTTONUP:
-                if board.coordinates(event.pos) in [(12, 13), (12, 14), (13, 13), (13, 14), (14, 13), (14, 14), (15, 13), (15, 14), (16, 13), (16, 14), (17, 13), (17, 14)]:
+                if board.coordinates(event.pos) in [(12, 13), (12, 14), (13, 13), (13, 14), (14, 13), (14, 14),
+                                                    (15, 13), (15, 14), (16, 13), (16, 14), (17, 13), (17, 14)]:
                     sounds.choose_sound.play()
                     begingGame.BegingGame().start()
                 if board.coordinates(event.pos) in [(2, 17), (2, 18), (1, 17), (1, 18)]:
@@ -95,10 +91,5 @@ if __name__ == "__main__":
         button = load_image("rules_button.png")
         button = pygame.transform.scale(button, (80, 80))
         screen.blit(button, (40, 680))
-        # board.render(screen)
-        
-
         pygame.display.flip()
-
     pygame.quit()
-

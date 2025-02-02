@@ -44,13 +44,10 @@ def validate_and_fix_data(cursor):
                 set_clause = ', '.join(f"{col} = ?" for col in update_values.keys())
                 cursor.execute(f"UPDATE {table} SET {set_clause} WHERE rowid = ?",
                                list(update_values.values()) + [row[0]])
-
-        # Если таблица users пуста, добавляем запись по умолчанию
         if table == 'users' and not rows:
             cursor.execute(
-                "INSERT INTO users (levelOne_complite, levelTwo_complite, levelThree_complite, levelFour_complite, total_complite) VALUES (0, 0, 0, 0, 0)")
-
-    # Обновляем столбец total_complite
+                "INSERT INTO users (levelOne_complite, levelTwo_complite, levelThree_complite, levelFour_complite,"
+                " total_complite) VALUES (0, 0, 0, 0, 0)")
     cursor.execute("""
         UPDATE users 
         SET total_complite = levelOne_complite + levelTwo_complite + levelThree_complite + levelFour_complite
@@ -67,9 +64,9 @@ def create_database():
             columns_str = ', '.join(f'{col} {dtype}' for col, dtype in columns.items())
             cursor.execute(f"CREATE TABLE IF NOT EXISTS {table} ({columns_str})")
         cursor.execute(
-            "INSERT INTO users (levelOne_complite, levelTwo_complite, levelThree_complite, levelFour_complite, total_complite) VALUES (0, 0, 0, 0, 0)")
+            "INSERT INTO users (levelOne_complite, levelTwo_complite, levelThree_complite, levelFour_complite,"
+            " total_complite) VALUES (0, 0, 0, 0, 0)")
         conn.commit()
-
 
 
 def reset_database():
@@ -133,25 +130,22 @@ def update_user_progress(G, coins, time):
               3: 'levelThree',
               4: 'levelFour'}
     db_path = os.path.join(os.path.dirname(__file__), 'data', 'game')
-    if G not in {1, 2, 3, 4}:  # Проверяем, что G в допустимых пределах
+    if G not in {1, 2, 3, 4}:
         raise ValueError("G должен быть от 1 до 4")
     s = {1: 'levelOne_complite',
          2: 'levelTwo_complite',
          3: 'levelThree_complite',
          4: 'levelFour_complite'}
-    column_name = s[G]  # Определяем название столбца
+    column_name = s[G]
     level_table_name = levels[G]
     with sqlite3.connect(db_path) as conn:
         cursor = conn.cursor()
 
-        # Получаем текущее значение уровня и общей суммы
         cursor.execute(f"SELECT {column_name}, total_complite FROM users")
         result = cursor.fetchone()
-        print('res', result)
 
         cursor.execute(f"SELECT time, coins FROM {level_table_name}")
         result2 = cursor.fetchone()
-        print('res', result2)
 
         if result is None:
             raise ValueError("В таблице users нет данных")
@@ -165,19 +159,17 @@ def update_user_progress(G, coins, time):
             if coins_before < coins:
                 coins_before = coins
             cursor.execute(f"UPDATE {level_table_name} SET time = {time_before}, coins = {coins_before}")
-            conn.commit()   
+            conn.commit()
 
         level_status, total_complite = result
 
         if level_status == 0:
-            # Если уровень ещё не пройден, обновляем его и увеличиваем total_complite
             new_total = total_complite + 1
             cursor.execute(f"UPDATE users SET {column_name} = 1, total_complite = ?",
                            (new_total,))
-
             conn.commit()
         else:
-            new_total = total_complite  # Если уровень уже был пройден, total_complite не меняется
+            new_total = total_complite
 
         return new_total >= G
 
@@ -209,6 +201,7 @@ def check_level_completion(G):
 
         return result[0] == 1
 
+
 def get_level_info(G):
     s = {1: 'levelOne',
          2: 'levelTwo',
@@ -221,4 +214,3 @@ def get_level_info(G):
         result = cursor.fetchone()
         print(result)
     return result
-# check_and_update_database()

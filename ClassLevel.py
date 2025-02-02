@@ -8,15 +8,14 @@ import sounds
 import sqlite_start
 
 
-
-
 class mutableInt:
     def __init__(self):
         self.cnt = 0
 
+
 class Level:
 
-    def __init__(self, levelMap:list, background:pygame):
+    def __init__(self, levelMap: list, background: pygame):
         self.levelMap = levelMap
         self.background = pygame.transform.scale(background, (1200, 800))
         self.all_sprites_bloks = pygame.sprite.Group()
@@ -58,34 +57,42 @@ class Level:
         for i in range(len(self.levelMap)):
             for j in range(len(self.levelMap[i])):
                 if self.levelMap[i][j] == "@":
-                    self.robber = ClassSprites.Robber(self.all_sprites_robber, x = j*40, y = i*40, levelMap=self.levelMap, box_service=box_service)
+                    self.robber = ClassSprites.Robber(self.all_sprites_robber, x=j * 40, y=i * 40,
+                                                      levelMap=self.levelMap, box_service=box_service)
                 elif self.levelMap[i][j] == "$":
-                    self.mag = ClassSprites.Mag(self.all_sprites_mag, x = j*40, y = i*40, levelMap=self.levelMap, box_service=box_service)
+                    self.mag = ClassSprites.Mag(self.all_sprites_mag, x=j * 40, y=i * 40, levelMap=self.levelMap,
+                                                box_service=box_service)
         for i in range(len(self.levelMap)):
             for j in range(len(self.levelMap[i])):
                 if self.levelMap[i][j] == "#":
-                    ClassSprites.Block(self.all_sprites_bloks, x = j*40, y = i*40)
+                    ClassSprites.Block(self.all_sprites_bloks, x=j * 40, y=i * 40)
                 elif self.levelMap[i][j] == "7":
-                    ClassSprites.Coin(self.all_sprites_coins, x = j*40, y = i*40)
+                    ClassSprites.Coin(self.all_sprites_coins, x=j * 40, y=i * 40)
                     self.coins += 1
                 elif self.levelMap[i][j] == "I":
-                    ClassSprites.MagicDoor(self.all_sprites_magicdoor, x = j*40, y = i*40)
+                    ClassSprites.MagicDoor(self.all_sprites_magicdoor, x=j * 40, y=i * 40)
                 elif self.levelMap[i][j] == "T":
-                    self.doors.append(ClassSprites.Door(self.all_sprites_door, x = j*40, y = i*40))
+                    self.doors.append(ClassSprites.Door(self.all_sprites_door, x=j * 40, y=i * 40))
                 elif self.levelMap[i][j] == "0":
-                    self.buttons.append(ClassSprites.Button(self.all_sprites_button, x = j*40, y = i*40))
+                    self.buttons.append(ClassSprites.Button(self.all_sprites_button, x=j * 40, y=i * 40))
                 elif self.levelMap[i][j] == "*":
-                    self.levers.append(ClassSprites.Lever(self.all_sprites_lever, x = j*40, y = i*40))
+                    self.levers.append(ClassSprites.Lever(self.all_sprites_lever, x=j * 40, y=i * 40))
                 elif self.levelMap[i][j] == "-":
-                    self.gorizontaldoors.append(ClassSprites.GorizontalDoor(self.all_sprites_gorizontaledoors, x = j*40, y = i*40))
+                    self.gorizontaldoors.append(
+                        ClassSprites.GorizontalDoor(self.all_sprites_gorizontaledoors, x=j * 40, y=i * 40))
                 elif self.levelMap[i][j] == "|":
-                    self.verticaldoors.append(ClassSprites.VerticalDoor(self.all_sprites_verticaldoors, x = j*40, y = i*40))
+                    self.verticaldoors.append(
+                        ClassSprites.VerticalDoor(self.all_sprites_verticaldoors, x=j * 40, y=i * 40))
                 elif self.levelMap[i][j] == "X":
-                    self.monsterss.append(ClassSprites.Monsters(self.all_monsterss, x = j*40, y = i*40, levelMap=self.levelMap, mag=self.mag, robber=self.robber, box_service=box_service))
+                    self.monsterss.append(
+                        ClassSprites.Monsters(self.all_monsterss, x=j * 40, y=i * 40, levelMap=self.levelMap,
+                                              mag=self.mag, robber=self.robber, box_service=box_service))
                 elif self.levelMap[i][j] == "B":
-                    self.boxs.append(ClassSprites.Box(self.all_sprites_box, x = j*40, y = i*40, levelMap=self.levelMap, robber=self.robber, mag=self.mag, box_service=box_service))
+                    self.boxs.append(ClassSprites.Box(self.all_sprites_box, x=j * 40, y=i * 40, levelMap=self.levelMap,
+                                                      robber=self.robber, mag=self.mag, box_service=box_service))
                 elif self.levelMap[i][j] == "S":
-                    ClassSprites.Spike(self.all_sprites_spikes, x = j*40, y = i*40, levelMap=self.levelMap, robber=self.robber, mag=self.mag)
+                    ClassSprites.Spike(self.all_sprites_spikes, x=j * 40, y=i * 40, levelMap=self.levelMap,
+                                       robber=self.robber, mag=self.mag)
 
     def correct_levelMap(self):
         d = -1
@@ -108,19 +115,18 @@ class Level:
                     continue
                 if self.levelMap[i][j] == "T":
                     d = i + 1
-                    self.levelMap[i+1] = self.levelMap[i+1][:j]+"T"+self.levelMap[i+1][j+1:]
+                    self.levelMap[i + 1] = self.levelMap[i + 1][:j] + "T" + self.levelMap[i + 1][j + 1:]
                 if self.levelMap[i][j] == "I":
                     t = i + 1
-                    self.levelMap[i+1] = self.levelMap[i+1][:j]+"I"+self.levelMap[i+1][j+1:]
+                    self.levelMap[i + 1] = self.levelMap[i + 1][:j] + "I" + self.levelMap[i + 1][j + 1:]
                 if self.levelMap[i][j] == "|":
                     o = i + 1
-                    self.levelMap[i+1] = self.levelMap[i+1][:j]+"|"+self.levelMap[i+1][j+1:]
+                    self.levelMap[i + 1] = self.levelMap[i + 1][:j] + "|" + self.levelMap[i + 1][j + 1:]
                 if self.levelMap[i][j] == "-":
-                    self.levelMap[i] = self.levelMap[i][:j+1]+"-"+self.levelMap[i][j+2:]
-                    k = j+1
+                    self.levelMap[i] = self.levelMap[i][:j + 1] + "-" + self.levelMap[i][j + 2:]
+                    k = j + 1
 
-
-    def bild(self, screen:pygame.display):
+    def bild(self, screen: pygame.display):
         screen.blit(self.background, (0, 0))
         self.all_sprites_bloks.draw(screen)
         self.all_sprites_coins.draw(screen)
@@ -147,7 +153,6 @@ class Level:
             text_rect = text.get_rect(center=(pos[0], pos[1]))
         self.screen.blit(text, text_rect)
         pygame.display.flip()
-
         # Задержка перед завершением
         pygame.time.wait(1500)
 
@@ -156,12 +161,10 @@ class Level:
         self.screen.fill((0, 128, 0))  # Зелёный фон
         self.display_message("Победа!", (255, 255, 255))
         self.show_resalt_screen(time, G)
-        # self.display_message("Результаты:", (255, 255, 255))
 
     def show_resalt_screen(self, time, G):
         """Показ окна результатов."""
         self.screen.fill((169, 69, 69))
-        #self.display_message("Победа!", (255, 255, 255))
         self.display_message("Результаты:", (255, 255, 255), (600, 200))
         self.display_message(f"Собрано монет: {self.coinsCollect.cnt}/{self.coins}", (255, 255, 255), (600, 300))
         self.display_message(f"Времени затрачено: {time} сек", (255, 255, 255), (600, 400))
@@ -205,11 +208,10 @@ class LevelOne(Level):
                 self.show_lose_screen()
                 self.running = False
                 break
-            
-            #Проверка условий победы
+
+            # Проверка условий победы
             if self.doors[0].near_door and self.doors[1].near_door:
-                time = (pygame.time.get_ticks()-self.time)//1000
-                print(sqlite_start.update_user_progress(1, self.coinsCollect.cnt, time))
+                time = (pygame.time.get_ticks() - self.time) // 1000
                 sounds.win_sound.play()
                 self.show_win_screen(time, 1)
                 self.running = False
@@ -256,16 +258,14 @@ class LevelTwo(Level):
 
             # Проверка условий поражения
             if not self.mag.alive or not self.robber.alive:
-                # self.running = False
                 sounds.loose_sound.play()
                 self.show_lose_screen()
                 self.running = False
                 break
 
-            #Проверка условий победы
+            # Проверка условий победы
             if self.doors[0].near_door and self.doors[1].near_door:
-                time = (pygame.time.get_ticks()-self.time)//1000
-                print(sqlite_start.update_user_progress(2, self.coinsCollect.cnt, time))
+                time = (pygame.time.get_ticks() - self.time) // 1000
                 sounds.win_sound.play()
                 self.show_win_screen(time, 2)
                 self.running = False
@@ -288,7 +288,6 @@ class LevelTwo(Level):
                 i.check(self.levelMap)
             self.clock.tick(commonConsts.FPS)
             pygame.display.flip()
-
 
 
 class LevelThree(Level):
@@ -318,11 +317,10 @@ class LevelThree(Level):
                 self.show_lose_screen()
                 self.running = False
                 break
-            
-            #Проверка условий победы
+
+            # Проверка условий победы
             if self.doors[0].near_door and self.doors[1].near_door:
-                time = (pygame.time.get_ticks()-self.time)//1000
-                print(sqlite_start.update_user_progress(3, self.coinsCollect.cnt, time))
+                time = (pygame.time.get_ticks() - self.time) // 1000
                 sounds.win_sound.play()
                 self.show_win_screen(time, 3)
                 self.running = False
@@ -337,7 +335,7 @@ class LevelThree(Level):
             self.all_sprites_lever.update(eventt, mag=self.mag, robber=self.robber)
             self.all_sprites_button.update(eventt, mag=self.mag, robber=self.robber)
             self.all_sprites_door.update(eventt, mag=self.mag, robber=self.robber, levelMap=self.levelMap)
-            
+
             self.all_sprites_spikes.update(eventt)
             for i in self.gorizontaldoors:
                 i.check(self.levelMap)
@@ -399,11 +397,10 @@ class LevelFour(Level):
                 self.show_lose_screen()
                 self.running = False
                 break
-            
-            #Проверка условий победы
+
+            # Проверка условий победы
             if self.doors[0].near_door and self.doors[1].near_door:
-                time = (pygame.time.get_ticks()-self.time)//1000
-                print(sqlite_start.update_user_progress(4, self.coinsCollect.cnt, time))
+                time = (pygame.time.get_ticks() - self.time) // 1000
                 sounds.win_sound.play()
                 self.show_win_screen(time, 4)
                 self.running = False
@@ -427,6 +424,7 @@ class LevelFour(Level):
             self.clock.tick(commonConsts.FPS)
             pygame.display.flip()
 
+
 def load_image(name, colorkey=None):
     fullname = os.path.join("data", name)
     if not os.path.isfile(fullname):
@@ -434,23 +432,3 @@ def load_image(name, colorkey=None):
         sys.exit()
     image = pygame.image.load(fullname)
     return image
-
-# with open("data\level_2.txt") as f:
-#     level = f.read()  
-# if __name__ == "__main__":    
-#     LevelTwo(levelMap=level.split("\n"), background=load_image("background_lvl_2.jpg")).paint()
-
-# with open("data\level_1.txt") as f:
-#     level = f.read()  
-# if __name__ == "__main__":    
-#     LevelOne(levelMap=level.split("\n"), background=load_image("background_lvl_1.jpg")).paint()
-
-# with open("data\level_3.txt") as f:
-#     level = f.read()  
-# if __name__ == "__main__":    
-#     LevelThree(levelMap=level.split("\n"), background=load_image("background_lvl_3.jpg")).paint()
-
-# with open("data\level_4.txt") as f:
-#     level = f.read()  
-# if __name__ == "__main__":    
-#     LevelFour(levelMap=level.split("\n"), background=load_image("background_lvl_4.jpg")).paint()

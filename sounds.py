@@ -1,4 +1,5 @@
 import pygame
+
 pygame.init()
 
 win_sound = pygame.mixer.Sound('data\\win_sound.wav')
