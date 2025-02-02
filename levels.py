@@ -77,7 +77,7 @@ class Levels:
                         sounds.choose_sound.play()
                         if self.level is not None and self.level.running:
                             continue
-                        with open("data\level_1.txt") as f:
+                        with open(r"data\level_1.txt") as f:
                             level = f.read()
                         self.level = ClassLevel.LevelOne(levelMap=level.split("\n"),
                                                          background=load_image("background_lvl_1.jpg")).paint()
@@ -87,7 +87,7 @@ class Levels:
                         sounds.choose_sound.play()
                         if not sqlite_start.check_level_completion(1):
                             continue
-                        with open("data\level_2.txt") as f:
+                        with open(r"data\level_2.txt") as f:
                             level = f.read()
                         self.level = ClassLevel.LevelTwo(levelMap=level.split("\n"),
                                                          background=load_image("background_lvl_2.jpg")).paint()
@@ -98,7 +98,7 @@ class Levels:
                         sounds.choose_sound.play()
                         if not sqlite_start.check_level_completion(2):
                             continue
-                        with open("data\level_3.txt") as f:
+                        with open(r"data\level_3.txt") as f:
                             level = f.read()
                         self.level = ClassLevel.LevelThree(levelMap=level.split("\n"),
                                                            background=load_image("background_lvl_3.jpg")).paint()
@@ -108,7 +108,7 @@ class Levels:
                         sounds.choose_sound.play()
                         if not sqlite_start.check_level_completion(3):
                             continue
-                        with open("data\level_4.txt") as f:
+                        with open(r"data\level_4.txt") as f:
                             level = f.read()
                         self.level = ClassLevel.LevelFour(levelMap=level.split("\n"),
                                                           background=load_image("background_lvl_4.jpg")).paint()
