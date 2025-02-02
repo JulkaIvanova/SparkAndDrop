@@ -212,5 +212,4 @@ def get_level_info(G):
         cursor = conn.cursor()
         cursor.execute(f"SELECT time, coins FROM {level_name}")
         result = cursor.fetchone()
-        print(result)
     return result

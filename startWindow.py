@@ -2,7 +2,6 @@ import pygame
 import begingGame
 import sounds
 import ruls
-import sqlite_start
 import os
 import sys
 

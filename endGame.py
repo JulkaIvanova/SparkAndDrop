@@ -23,8 +23,6 @@ class EndGame:
         img = pygame.transform.scale(img, (1200, 800))
         cnt = 0
         running = True
-        flag = False
-        pos = (0, 0)
         pygame.display.set_caption("Самое ценное сокровище")
 
         while running:

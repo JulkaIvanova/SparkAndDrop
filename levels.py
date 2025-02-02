@@ -64,8 +64,6 @@ class Levels:
 
     def start(self):
         running = True
-        pos = (0, 0)
-        cnt = 0
         pygame.display.set_caption("Самое ценное сокровище")
         while running:
             self.screen.fill((0, 0, 0))
@@ -83,7 +81,6 @@ class Levels:
                             level = f.read()
                         self.level = ClassLevel.LevelOne(levelMap=level.split("\n"),
                                                          background=load_image("background_lvl_1.jpg")).paint()
-                        print("1")
                     elif self.board.coordinates(event.pos) in [(18, 4), (19, 4), (20, 4), (21, 4), (18, 5), (19, 5),
                                                                (20, 5), (21, 5), (18, 6), (19, 6), (20, 6), (21, 6),
                                                                (18, 7), (19, 7), (20, 7), (21, 7)]:
@@ -94,7 +91,6 @@ class Levels:
                             level = f.read()
                         self.level = ClassLevel.LevelTwo(levelMap=level.split("\n"),
                                                          background=load_image("background_lvl_2.jpg")).paint()
-                        print("2")
                     elif self.board.coordinates(event.pos) in [(18, 11), (19, 11), (20, 11), (21, 11), (18, 12),
                                                                (19, 12), (20, 12), (21, 12), (18, 13), (19, 13),
                                                                (20, 13), (21, 13), (18, 14), (19, 14), (20, 14),
@@ -106,7 +102,6 @@ class Levels:
                             level = f.read()
                         self.level = ClassLevel.LevelThree(levelMap=level.split("\n"),
                                                            background=load_image("background_lvl_3.jpg")).paint()
-                        print("3")
                     elif self.board.coordinates(event.pos) in [(8, 11), (9, 11), (10, 11), (11, 11), (8, 12), (9, 12),
                                                                (10, 12), (11, 12), (8, 13), (9, 13), (10, 13), (11, 13),
                                                                (8, 14), (9, 14), (10, 14), (11, 14)]:
@@ -117,7 +112,6 @@ class Levels:
                             level = f.read()
                         self.level = ClassLevel.LevelFour(levelMap=level.split("\n"),
                                                           background=load_image("background_lvl_4.jpg")).paint()
-                        print("4")
                         if not sqlite_start.check_level_completion(4):
                             continue
                         endGame.EndGame().start()
@@ -125,7 +119,6 @@ class Levels:
                                                                (15, 17), (16, 16), (16, 17)]:
                         sounds.choose_sound.play()
                         running = False
-                        print("exit")
             img = load_image("levels.png")
             img = pygame.transform.scale(img, (1200, 800))
             self.screen.blit(img, (0, 0))
