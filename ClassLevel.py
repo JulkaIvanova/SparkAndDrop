@@ -267,7 +267,7 @@ class LevelTwo(Level):
             # Проверка условий победы
             if self.doors[0].near_door and self.doors[1].near_door:
                 time = (pygame.time.get_ticks() - self.time) // 1000
-                sqlite_start.update_user_progress(1, self.coinsCollect.cnt, time)
+                sqlite_start.update_user_progress(2, self.coinsCollect.cnt, time)
                 sounds.win_sound.play()
                 self.show_win_screen(time, 2)
                 self.running = False
@@ -323,7 +323,7 @@ class LevelThree(Level):
             # Проверка условий победы
             if self.doors[0].near_door and self.doors[1].near_door:
                 time = (pygame.time.get_ticks() - self.time) // 1000
-                sqlite_start.update_user_progress(1, self.coinsCollect.cnt, time)
+                sqlite_start.update_user_progress(3, self.coinsCollect.cnt, time)
                 sounds.win_sound.play()
                 self.show_win_screen(time, 3)
                 self.running = False
@@ -404,7 +404,7 @@ class LevelFour(Level):
             # Проверка условий победы
             if self.doors[0].near_door and self.doors[1].near_door:
                 time = (pygame.time.get_ticks() - self.time) // 1000
-                sqlite_start.update_user_progress(1, self.coinsCollect.cnt, time)
+                sqlite_start.update_user_progress(4, self.coinsCollect.cnt, time)
                 sounds.win_sound.play()
                 self.show_win_screen(time, 4)
                 self.running = False
