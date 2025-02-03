@@ -169,9 +169,9 @@ class Level:
         self.display_message(f"Собрано монет: {self.coinsCollect.cnt}/{self.coins}", (255, 255, 255), (600, 300))
         self.display_message(f"Времени затрачено: {time} сек", (255, 255, 255), (600, 400))
         res = sqlite_start.get_level_info(G)
-        print("yyyyyyyyy", res)
-        self.display_message(f"Рекордное время: {int(res[0])} сек", (255, 255, 255), (600, 500))
-        self.display_message(f"Наибольшее количество монет: {res[1]}/{self.coins}", (255, 255, 255), (600, 600))
+        if res is not None:
+            self.display_message(f"Рекордное время: {int(res[0])} сек", (255, 255, 255), (600, 500))
+            self.display_message(f"Наибольшее количество монет: {res[1]}/{self.coins}", (255, 255, 255), (600, 600))
 
     def show_lose_screen(self):
         """Показ окна поражения."""
@@ -212,6 +212,7 @@ class LevelOne(Level):
             # Проверка условий победы
             if self.doors[0].near_door and self.doors[1].near_door:
                 time = (pygame.time.get_ticks() - self.time) // 1000
+                sqlite_start.update_user_progress(1, self.coinsCollect.cnt, time)
                 sounds.win_sound.play()
                 self.show_win_screen(time, 1)
                 self.running = False
@@ -266,6 +267,7 @@ class LevelTwo(Level):
             # Проверка условий победы
             if self.doors[0].near_door and self.doors[1].near_door:
                 time = (pygame.time.get_ticks() - self.time) // 1000
+                sqlite_start.update_user_progress(1, self.coinsCollect.cnt, time)
                 sounds.win_sound.play()
                 self.show_win_screen(time, 2)
                 self.running = False
@@ -321,6 +323,7 @@ class LevelThree(Level):
             # Проверка условий победы
             if self.doors[0].near_door and self.doors[1].near_door:
                 time = (pygame.time.get_ticks() - self.time) // 1000
+                sqlite_start.update_user_progress(1, self.coinsCollect.cnt, time)
                 sounds.win_sound.play()
                 self.show_win_screen(time, 3)
                 self.running = False
@@ -401,6 +404,7 @@ class LevelFour(Level):
             # Проверка условий победы
             if self.doors[0].near_door and self.doors[1].near_door:
                 time = (pygame.time.get_ticks() - self.time) // 1000
+                sqlite_start.update_user_progress(1, self.coinsCollect.cnt, time)
                 sounds.win_sound.play()
                 self.show_win_screen(time, 4)
                 self.running = False

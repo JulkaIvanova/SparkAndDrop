@@ -1,7 +1,6 @@
 import pygame
 import os
 import sys
-import math
 import commonConsts
 import spritesBase
 import sounds
@@ -79,9 +78,10 @@ class MagicDoor(spritesBase.GameSprite):
 
     def __init__(self, *group, x, y):
         super().__init__(MagicDoor.image, x, y, *group, width=40, height=80)
+        self.ypos = y
 
     def update(self, *args, mag: spritesBase.GameSprite, levelMap):
-        if self.rect.left == mag.rect.right or self.rect.right == mag.rect.left:
+        if (self.rect.left == mag.rect.right or self.rect.right == mag.rect.left) and (self.get_bottom_cell_y(1) == mag.get_bottom_cell_y() or self.get_bottom_cell_y() == mag.get_bottom_cell_y()):
             if args and pygame.key.get_pressed()[pygame.K_e]:
                 levelMap[int(self.rect.y // 40)] = levelMap[int(self.rect.y // 40)][:int(self.rect.x // 40)] + "." + \
                                                    levelMap[int(self.rect.y // 40)][int(self.rect.x // 40) + 1:]
