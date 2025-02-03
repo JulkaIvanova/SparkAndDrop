@@ -129,7 +129,7 @@ def update_user_progress(G, coins, time):
               2: 'levelTwo',
               3: 'levelThree',
               4: 'levelFour'}
-    db_path = os.path.join(os.path.dirname(__file__), 'data', 'game')
+
     if G not in {1, 2, 3, 4}:
         raise ValueError("G должен быть от 1 до 4")
     s = {1: 'levelOne_complite',
