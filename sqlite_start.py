@@ -1,7 +1,7 @@
 import os
 import sqlite3
 
-db_path = os.path.join(os.path.dirname(__file__), 'data', 'game')
+db_path = os.path.join('data', 'game')
 
 expected_structure = {
     'users': {
