@@ -18,6 +18,8 @@ class Ruls:
         return pygame.image.load(fullname)
 
     def start(self):
+        cursor_image = self.load_image("arrow.png")
+        cursor_rect = cursor_image.get_rect()
         imgs = ['p_1.png', 'p_2.png', 'p_3.png', 'p_4.png', 'p_5.png', 'p_6.png', 'p_7.png', 'p_8.png']
         n = 0
         img = pygame.transform.scale(self.load_image(imgs[n]), (1200, 800))
@@ -37,4 +39,9 @@ class Ruls:
                     n += 1
                     img = pygame.transform.scale(self.load_image(imgs[n]), (1200, 800))
             self.screen.blit(img, (0, 0))
+            # Обновляем позицию курсора
+            cursor_rect.center = pygame.mouse.get_pos()
+            # Рисуем новый курсор на фоне
+            if cursor_rect.center[0] > 0 and cursor_rect.center[1] > 0 and cursor_rect.center[1] < 799 and cursor_rect.center[0] < 1199:
+                self.screen.blit(cursor_image, cursor_rect)
             pygame.display.flip()

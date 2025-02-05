@@ -20,6 +20,8 @@ class EndGame:
 
     def start(self):
         img = self.load_image("three.png")
+        cursor_image = self.load_image("arrow.png")
+        cursor_rect = cursor_image.get_rect()
         img = pygame.transform.scale(img, (1200, 800))
         cnt = 0
         running = True
@@ -43,4 +45,9 @@ class EndGame:
                     cnt += 1
 
             self.screen.blit(img, (0, 0))
+            # Обновляем позицию курсора
+            cursor_rect.center = pygame.mouse.get_pos()
+            # Рисуем новый курсор на фоне
+            if cursor_rect.center[0] > 0 and cursor_rect.center[1] > 0 and cursor_rect.center[1] < 799 and cursor_rect.center[0] < 1199:
+                self.screen.blit(cursor_image, cursor_rect)
             pygame.display.flip()

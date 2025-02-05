@@ -127,6 +127,6 @@ class Levels:
             self.screen.blit(img, (0, 0))
             # Обновляем позицию курсора
             cursor_rect.center = pygame.mouse.get_pos()
-            # Рисуем новый курсор на фоне
-            self.screen.blit(cursor_image, cursor_rect)
+            if cursor_rect.center[0] > 0 and cursor_rect.center[1] > 0 and cursor_rect.center[1] < 799 and cursor_rect.center[0] < 1199:
+                self.screen.blit(cursor_image, cursor_rect)
             pygame.display.flip()
