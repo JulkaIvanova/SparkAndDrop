@@ -64,6 +64,9 @@ class Levels:
 
     def start(self):
         running = True
+        cursor_image = load_image("arrow.png")
+        cursor_rect = cursor_image.get_rect()
+        pygame.mouse.set_visible(False)
         pygame.display.set_caption("Самое ценное сокровище")
         while running:
             self.screen.fill((0, 0, 0))
@@ -122,5 +125,8 @@ class Levels:
             img = load_image("levels.png")
             img = pygame.transform.scale(img, (1200, 800))
             self.screen.blit(img, (0, 0))
-
+            # Обновляем позицию курсора
+            cursor_rect.center = pygame.mouse.get_pos()
+            # Рисуем новый курсор на фоне
+            self.screen.blit(cursor_image, cursor_rect)
             pygame.display.flip()

@@ -62,6 +62,9 @@ def load_image(name, colorkey=None):
 
 
 if __name__ == "__main__":
+    cursor_image = load_image("arrow.png")
+    cursor_rect = cursor_image.get_rect()
+    pygame.mouse.set_visible(False)
     running = True
     flag = False
     pos = (0, 0)
@@ -83,12 +86,15 @@ if __name__ == "__main__":
                 if board.coordinates(event.pos) in [(2, 17), (2, 18), (1, 17), (1, 18)]:
                     sounds.choose_sound.play()
                     ruls.Ruls().start()
-
         image = load_image("r2.png")
         image = pygame.transform.scale(image, (1200, 800))
         screen.blit(image, pos)
         button = load_image("rules_button.png")
         button = pygame.transform.scale(button, (80, 80))
         screen.blit(button, (40, 680))
+        # Обновляем позицию курсора
+        cursor_rect.center = pygame.mouse.get_pos()
+        # Рисуем новый курсор на фоне
+        screen.blit(cursor_image, cursor_rect)
         pygame.display.flip()
     pygame.quit()
